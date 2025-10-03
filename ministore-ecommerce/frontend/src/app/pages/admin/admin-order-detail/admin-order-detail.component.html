@@ -128,16 +128,16 @@
             </h3>
             <div class="shipping-card">
               <div class="shipping-info">
-                <h6 class="recipient-name">{{ order.shippingAddress?.fullName }}</h6>
+                <h6 class="recipient-name">{{ order.shippingAddress.fullName }}</h6>
                 <p class="recipient-phone">
                   <i class="bi bi-telephone me-2"></i>
-                  {{ order.shippingAddress?.phone }}
+                  {{ order.shippingAddress.phone }}
                 </p>
                 <p class="shipping-address">
                   <i class="bi bi-geo-alt me-2"></i>
-                  {{ order.shippingAddress?.address }}, {{ order.shippingAddress?.ward }}, {{ order.shippingAddress?.district }}, {{ order.shippingAddress?.city }}
+                  {{ order.shippingAddress.address }}, {{ order.shippingAddress.ward }}, {{ order.shippingAddress.district }}, {{ order.shippingAddress.city }}
                 </p>
-                @if (order.shippingAddress?.postalCode) {
+                @if (order.shippingAddress.postalCode) {
                   <p class="postal-code">
                     <i class="bi bi-mailbox me-2"></i>
                     Mã bưu điện: {{ order.shippingAddress.postalCode }}

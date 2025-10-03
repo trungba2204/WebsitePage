@@ -102,10 +102,10 @@
                 </td>
                 <td>
                   <div class="customer-info">
-                    <h6 class="customer-name">{{ order.shippingAddress?.fullName || 'Khách hàng ẩn danh' }}</h6>
-                    <small class="text-muted">{{ order.shippingAddress?.phone || 'Chưa có SĐT' }}</small>
+                    <h6 class="customer-name">{{ order.shippingAddress.fullName || 'Khách hàng ẩn danh' }}</h6>
+                    <small class="text-muted">{{ order.shippingAddress.phone || 'Chưa có SĐT' }}</small>
                     <div class="customer-address">
-                      <small class="text-muted">{{ order.shippingAddress?.address }}, {{ order.shippingAddress?.city }}</small>
+                      <small class="text-muted">{{ order.shippingAddress.address }}, {{ order.shippingAddress.city }}</small>
                     </div>
                   </div>
                 </td>

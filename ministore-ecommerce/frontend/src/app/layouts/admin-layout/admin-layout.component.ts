@@ -63,8 +63,8 @@ export class AdminLayoutComponent implements OnInit {
     // Track route changes
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
-        this.currentRoute = event.url;
+      .subscribe((event) => {
+        this.currentRoute = (event as NavigationEnd).url;
         this.updateActiveMenuItem();
       });
 

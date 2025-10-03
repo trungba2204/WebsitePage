@@ -1,194 +1,207 @@
 <div class="admin-dashboard">
   <div class="dashboard-header">
     <h1 class="dashboard-title">Dashboard</h1>
-    <p class="dashboard-subtitle">Tổng quan hệ thống MiniStore</p>
+    <p class="dashboard-subtitle">Tổng quan hệ thống quản lý</p>
   </div>
 
+  <!-- Loading State -->
   @if (isLoading) {
-    <div class="loading-state">
+    <div class="loading-container">
       <div class="spinner-border text-primary" role="status">
         <span class="visually-hidden">Đang tải...</span>
       </div>
       <p class="mt-3">Đang tải dữ liệu dashboard...</p>
     </div>
-  } @else if (stats) {
+  } @else {
     <!-- Stats Cards -->
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon users">
-          <i class="bi bi-people-fill"></i>
+        <div class="stat-icon">
+          <i class="bi bi-box-seam"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ formatNumber(stats.totalUsers) }}</div>
-          <div class="stat-label">Người dùng</div>
-          <div class="stat-change positive">
-            <i class="bi bi-arrow-up"></i>
-            +{{ formatNumber(stats.usersThisMonth) }} tháng này
-          </div>
+          <div class="stat-number">{{ stats.totalProducts }}</div>
+          <div class="stat-label">Tổng sản phẩm</div>
+        </div>
+        <div class="stat-action">
+          <a routerLink="/admin/products" class="btn btn-sm btn-outline-primary">
+            Xem chi tiết
+          </a>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon products">
-          <i class="bi bi-box-seam-fill"></i>
+        <div class="stat-icon">
+          <i class="bi bi-cart-check"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ formatNumber(stats.totalProducts) }}</div>
-          <div class="stat-label">Sản phẩm</div>
-          <div class="stat-change">
-            <i class="bi bi-info-circle"></i>
-            Tất cả danh mục
-          </div>
+          <div class="stat-number">{{ stats.totalOrders }}</div>
+          <div class="stat-label">Tổng đơn hàng</div>
+        </div>
+        <div class="stat-action">
+          <a routerLink="/admin/orders" class="btn btn-sm btn-outline-primary">
+            Xem chi tiết
+          </a>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon categories">
-          <i class="bi bi-tags-fill"></i>
+        <div class="stat-icon">
+          <i class="bi bi-people"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ formatNumber(stats.totalCategories) }}</div>
-          <div class="stat-label">Danh mục</div>
-          <div class="stat-change">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
-            Đang hoạt động
-          </div>
+          <div class="stat-number">{{ stats.totalUsers }}</div>
+          <div class="stat-label">Tổng người dùng</div>
+        </div>
+        <div class="stat-action">
+          <a routerLink="/admin/users" class="btn btn-sm btn-outline-primary">
+            Xem chi tiết
+          </a>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon orders">
-          <i class="bi bi-receipt-cutoff"></i>
-        </div>
-        <div class="stat-content">
-          <div class="stat-number">{{ formatNumber(stats.totalOrders) }}</div>
-          <div class="stat-label">Đơn hàng</div>
-          <div class="stat-change positive">
-            <i class="bi bi-arrow-up"></i>
-            +{{ formatNumber(stats.ordersThisMonth) }} tháng này
-          </div>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon blogs">
+        <div class="stat-icon">
           <i class="bi bi-journal-text"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ formatNumber(stats.totalBlogs) }}</div>
-          <div class="stat-label">Bài viết</div>
-          <div class="stat-change">
-            <i class="bi bi-pencil-square"></i>
-            Nội dung
-          </div>
+          <div class="stat-number">{{ stats.totalBlogs }}</div>
+          <div class="stat-label">Tổng bài viết</div>
+        </div>
+        <div class="stat-action">
+          <a routerLink="/admin/blogs" class="btn btn-sm btn-outline-primary">
+            Xem chi tiết
+          </a>
         </div>
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon revenue">
+        <div class="stat-icon">
           <i class="bi bi-currency-dollar"></i>
         </div>
         <div class="stat-content">
-          <div class="stat-number">{{ formatCurrency(stats.totalRevenue) }}</div>
-          <div class="stat-label">Doanh thu</div>
-          <div class="stat-change positive">
-            <i class="bi bi-trending-up"></i>
-            Tổng cộng
-          </div>
+          <div class="stat-number">{{ formatPrice(stats.totalRevenue) }}</div>
+          <div class="stat-label">Tổng doanh thu</div>
         </div>
-      </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="quick-actions">
-      <h3 class="section-title">Thao tác nhanh</h3>
-      <div class="actions-grid">
-        <a routerLink="/admin/products" class="action-card">
-          <div class="action-icon">
-            <i class="bi bi-plus-circle-fill"></i>
-          </div>
-          <div class="action-content">
-            <h4>Thêm sản phẩm</h4>
-            <p>Tạo sản phẩm mới</p>
-          </div>
-        </a>
-
-        <a routerLink="/admin/categories" class="action-card">
-          <div class="action-icon">
-            <i class="bi bi-tag-fill"></i>
-          </div>
-          <div class="action-content">
-            <h4>Quản lý danh mục</h4>
-            <p>Thêm/sửa danh mục</p>
-          </div>
-        </a>
-
-        <a routerLink="/admin/blogs" class="action-card">
-          <div class="action-icon">
-            <i class="bi bi-journal-plus"></i>
-          </div>
-          <div class="action-content">
-            <h4>Viết bài mới</h4>
-            <p>Tạo nội dung blog</p>
-          </div>
-        </a>
-
-        <a routerLink="/admin/orders" class="action-card">
-          <div class="action-icon">
-            <i class="bi bi-list-check"></i>
-          </div>
-          <div class="action-content">
-            <h4>Xem đơn hàng</h4>
-            <p>Quản lý đơn hàng</p>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="recent-activity">
-      <h3 class="section-title">Hoạt động gần đây</h3>
-      <div class="activity-list">
-        <div class="activity-item">
-          <div class="activity-icon">
-            <i class="bi bi-box-seam text-primary"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-text">Sản phẩm mới đã được thêm</div>
-            <div class="activity-time">2 giờ trước</div>
-          </div>
-        </div>
-
-        <div class="activity-item">
-          <div class="activity-icon">
-            <i class="bi bi-receipt text-success"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-text">Đơn hàng mới #12345</div>
-            <div class="activity-time">4 giờ trước</div>
-          </div>
-        </div>
-
-        <div class="activity-item">
-          <div class="activity-icon">
-            <i class="bi bi-journal-text text-info"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-text">Bài viết blog đã được xuất bản</div>
-            <div class="activity-time">1 ngày trước</div>
-          </div>
-        </div>
-
-        <div class="activity-item">
-          <div class="activity-icon">
-            <i class="bi bi-person-plus text-warning"></i>
-          </div>
-          <div class="activity-content">
-            <div class="activity-text">Người dùng mới đã đăng ký</div>
-            <div class="activity-time">2 ngày trước</div>
-          </div>
+        <div class="stat-action">
+          <a routerLink="/admin/orders" class="btn btn-sm btn-outline-primary">
+            Xem chi tiết
+          </a>
         </div>
       </div>
     </div>
   }
+
+    <!-- Content Grid -->
+    <div class="content-grid" *ngIf="!isLoading">
+      <!-- Recent Orders -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3 class="card-title">Đơn hàng gần đây</h3>
+          <a routerLink="/admin/orders" class="btn btn-sm btn-primary">
+            Xem tất cả
+          </a>
+        </div>
+        <div class="card-body">
+          @if (recentOrders.length > 0) {
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Mã đơn hàng</th>
+                    <th>Khách hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let order of recentOrders">
+                    <td>
+                      <a routerLink="/admin/orders/{{ order.id }}" class="text-decoration-none">
+                        {{ order.orderNumber }}
+                      </a>
+                    </td>
+                    <td>{{ order.shippingAddress.fullName || 'Khách hàng ẩn danh' }}</td>
+                    <td>{{ formatPrice(order.totalAmount) }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="getStatusClass(order.status)">
+                        {{ getStatusText(order.status) }}
+                      </span>
+                    </td>
+                    <td>{{ order.orderDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="bi bi-cart-x text-muted" style="font-size: 3rem;"></i>
+              <p class="mt-3 text-muted">Chưa có đơn hàng nào</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Top Products -->
+      <div class="content-card">
+        <div class="card-header">
+          <h3 class="card-title">Sản phẩm nổi bật</h3>
+          <a routerLink="/admin/products" class="btn btn-sm btn-primary">
+            Xem tất cả
+          </a>
+        </div>
+        <div class="card-body">
+          @if (topProducts.length > 0) {
+            <div class="product-list">
+              <div class="product-item" *ngFor="let product of topProducts; let i = index">
+                <div class="product-rank">
+                  <span class="rank-number">{{ i + 1 }}</span>
+                </div>
+                <div class="product-info">
+                  <h6 class="product-name">{{ product.name }}</h6>
+                  <div class="product-stats">
+                    <span class="sales-count">{{ product.sales }} bán</span>
+                    <span class="revenue">{{ formatPrice(product.revenue) }}</span>
+                  </div>
+                </div>
+                <div class="product-action">
+                  <a routerLink="/admin/products/{{ product.id }}/edit" class="btn btn-sm btn-outline-primary">
+                    Chỉnh sửa
+                  </a>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-state">
+              <i class="bi bi-box text-muted" style="font-size: 3rem;"></i>
+              <p class="mt-3 text-muted">Chưa có sản phẩm nào</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions" *ngIf="!isLoading">
+    <h3 class="section-title">Thao tác nhanh</h3>
+    <div class="action-buttons">
+      <a routerLink="/admin/products/new" class="action-btn">
+        <i class="bi bi-plus-circle"></i>
+        <span>Thêm sản phẩm</span>
+      </a>
+      <a routerLink="/admin/categories/new" class="action-btn">
+        <i class="bi bi-tag"></i>
+        <span>Thêm danh mục</span>
+      </a>
+      <a routerLink="/admin/blogs/new" class="action-btn">
+        <i class="bi bi-journal-plus"></i>
+        <span>Viết blog</span>
+      </a>
+      <a routerLink="/admin/users" class="action-btn">
+        <i class="bi bi-person-plus"></i>
+        <span>Quản lý người dùng</span>
+      </a>
+    </div>
+  </div>
 </div>
