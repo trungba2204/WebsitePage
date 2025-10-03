@@ -1,0 +1,220 @@
+<div class="admin-orders">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý đơn hàng</h1>
+        <p class="page-subtitle">Theo dõi và quản lý tất cả đơn hàng</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="search-box">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm theo mã đơn hàng, tên khách hàng..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()">
+            <button class="btn btn-outline-secondary" (click)="onSearch()">
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="statusFilter" (change)="onStatusFilterChange()">
+          @for (status of statusOptions; track status.value) {
+            <option [value]="status.value">{{ status.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [value]="5">5 đơn hàng/trang</option>
+          <option [value]="10">10 đơn hàng/trang</option>
+          <option [value]="20">20 đơn hàng/trang</option>
+          <option [value]="50">50 đơn hàng/trang</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="orders-table-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách đơn hàng...</p>
+      </div>
+    } @else if (orders.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-box"></i>
+        </div>
+        <h3>Chưa có đơn hàng nào</h3>
+        <p>Chưa có đơn hàng nào trong hệ thống.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="120">Mã đơn hàng</th>
+              <th (click)="onSort('shippingAddress.fullName')" class="sortable">
+                Khách hàng
+                <i [class]="'bi ' + getSortIcon('shippingAddress.fullName')"></i>
+              </th>
+              <th (click)="onSort('totalAmount')" class="sortable">
+                Tổng tiền
+                <i [class]="'bi ' + getSortIcon('totalAmount')"></i>
+              </th>
+              <th (click)="onSort('status')" class="sortable">
+                Trạng thái
+                <i [class]="'bi ' + getSortIcon('status')"></i>
+              </th>
+              <th>Thanh toán</th>
+              <th (click)="onSort('orderDate')" class="sortable">
+                Ngày đặt
+                <i [class]="'bi ' + getSortIcon('orderDate')"></i>
+              </th>
+              <th width="120">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (order of orders; track order.id) {
+              <tr>
+                <td>
+                  <div class="order-number">
+                    <strong>{{ order.orderNumber }}</strong>
+                    <small class="text-muted d-block">{{ getOrderItemsCount(order) }} sản phẩm</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="customer-info">
+                    <h6 class="customer-name">{{ order.shippingAddress?.fullName || 'Khách hàng ẩn danh' }}</h6>
+                    <small class="text-muted">{{ order.shippingAddress?.phone || 'Chưa có SĐT' }}</small>
+                    <div class="customer-address">
+                      <small class="text-muted">{{ order.shippingAddress?.address }}, {{ order.shippingAddress?.city }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="order-total">
+                    <strong class="total-amount">{{ formatPrice(order.totalAmount) }}</strong>
+                  </div>
+                </td>
+                <td>
+                  <div class="status-section">
+                    <span [class]="'badge ' + getStatusBadgeClass(order.status)">
+                      {{ getStatusText(order.status) }}
+                    </span>
+                    @if (canUpdateStatus(order)) {
+                      <div class="status-actions mt-1">
+                        <button 
+                          class="btn btn-sm btn-outline-primary"
+                          (click)="updateOrderStatus(order, getNextStatus(order.status)!)"
+                          [disabled]="isUpdating && updatingOrderId === order.id"
+                          [title]="'Cập nhật thành: ' + getNextStatusText(order.status)">
+                          @if (isUpdating && updatingOrderId === order.id) {
+                            <span class="spinner-border spinner-border-sm"></span>
+                          } @else {
+                            <i class="bi bi-arrow-right"></i>
+                            {{ getNextStatusText(order.status) }}
+                          }
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="payment-info">
+                    <i [class]="'bi ' + getPaymentMethodIcon(order.paymentMethod)"></i>
+                    <span class="payment-method">{{ getPaymentMethodText(order.paymentMethod) }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="order-date">
+                    <span class="date">{{ formatDate(order.orderDate) }}</span>
+                    @if (order.note) {
+                      <small class="text-muted d-block mt-1" [title]="order.note">
+                        <i class="bi bi-chat-text"></i>
+                        {{ order.note.length > 30 ? order.note.substring(0, 30) + '...' : order.note }}
+                      </small>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a [routerLink]="['/admin/orders', order.id]" 
+                       class="btn btn-outline-primary btn-sm" 
+                       title="Xem chi tiết">
+                      <i class="bi bi-eye"></i>
+                    </a>
+                    @if (order.status === 'PENDING') {
+                        <button 
+                          class="btn btn-outline-danger btn-sm" 
+                          (click)="updateOrderStatus(order, OrderStatus.CANCELLED)"
+                          [disabled]="isUpdating && updatingOrderId === order.id"
+                          title="Hủy đơn hàng">
+                        @if (isUpdating && updatingOrderId === order.id) {
+                          <span class="spinner-border spinner-border-sm"></span>
+                        } @else {
+                          <i class="bi bi-x-circle"></i>
+                        }
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination-container">
+          <nav aria-label="Orders pagination">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 0">
+                <button class="page-link" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              
+              @for (page of getPageNumbers(); track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                  <button class="page-link" (click)="onPageChange(page)">
+                    {{ page + 1 }}
+                  </button>
+                </li>
+              }
+              
+              <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+                <button class="page-link" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+          
+          <div class="pagination-info">
+            Hiển thị {{ currentPage * pageSize + 1 }} - {{ getEndIndex() }} 
+            trong tổng số {{ totalElements }} đơn hàng
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

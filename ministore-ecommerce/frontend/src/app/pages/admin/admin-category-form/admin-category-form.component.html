@@ -1,0 +1,167 @@
+<div class="admin-category-form">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <nav class="breadcrumb">
+          <a routerLink="/admin/dashboard" class="breadcrumb-item">Dashboard</a>
+          <a routerLink="/admin/categories" class="breadcrumb-item">Danh mục</a>
+          <span class="breadcrumb-item active">
+            {{ isEditMode ? 'Sửa danh mục' : 'Thêm danh mục mới' }}
+          </span>
+        </nav>
+        <h1 class="page-title">
+          {{ isEditMode ? 'Sửa danh mục' : 'Thêm danh mục mới' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Cập nhật thông tin danh mục' : 'Thêm danh mục mới vào hệ thống' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải thông tin danh mục...</p>
+      </div>
+    } @else {
+      <form (ngSubmit)="onSubmit()" #categoryFormRef="ngForm" class="category-form">
+        <div class="row">
+          <!-- Left Column -->
+          <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-info-circle me-2"></i>
+                Thông tin cơ bản
+              </h3>
+              
+              <div class="row g-3">
+                <div class="col-md-12">
+                  <label for="name" class="form-label required">Tên danh mục</label>
+                  <input
+                    type="text"
+                    id="name"
+                    class="form-control"
+                    [(ngModel)]="categoryForm.name"
+                    name="name"
+                    placeholder="Nhập tên danh mục"
+                    required>
+                </div>
+
+                <div class="col-md-12">
+                  <label for="description" class="form-label">Mô tả</label>
+                  <textarea
+                    id="description"
+                    class="form-control"
+                    [(ngModel)]="categoryForm.description"
+                    name="description"
+                    rows="4"
+                    placeholder="Nhập mô tả về danh mục (tùy chọn)"></textarea>
+                  <div class="form-text">
+                    Mô tả giúp khách hàng hiểu rõ hơn về danh mục này
+                  </div>
+                </div>
+
+                <div class="col-md-12">
+                  <label for="imageUrl" class="form-label">URL hình ảnh</label>
+                  <input
+                    type="url"
+                    id="imageUrl"
+                    class="form-control"
+                    [(ngModel)]="categoryForm.imageUrl"
+                    name="imageUrl"
+                    placeholder="https://example.com/category-image.jpg">
+                  <div class="form-text">
+                    Hình ảnh đại diện cho danh mục (tùy chọn)
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="col-lg-4">
+            <!-- Image Preview -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-image me-2"></i>
+                Xem trước hình ảnh
+              </h3>
+              
+              <div class="image-preview">
+                <div class="preview-container">
+                  <img [src]="previewImage()" [alt]="categoryForm.name || 'Danh mục'" class="preview-image">
+                  <div class="preview-overlay">
+                    <div class="preview-info">
+                      <i class="bi bi-eye"></i>
+                      <span>Xem trước</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="preview-text">
+                  <small class="text-muted">
+                    Hình ảnh sẽ hiển thị như này trên trang web
+                  </small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Summary -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-list-check me-2"></i>
+                Tóm tắt danh mục
+              </h3>
+              
+              <div class="summary-card">
+                <div class="summary-item">
+                  <span class="label">Tên:</span>
+                  <span class="value">{{ categoryForm.name || 'Chưa nhập' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Mô tả:</span>
+                  <span class="value">
+                    {{ categoryForm.description ? (categoryForm.description.length > 50 ? categoryForm.description.substring(0, 50) + '...' : categoryForm.description) : 'Chưa có' }}
+                  </span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Hình ảnh:</span>
+                  <span class="value">
+                    {{ categoryForm.imageUrl ? 'Đã có' : 'Chưa có' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <div class="actions-left">
+            <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Quay lại
+            </button>
+          </div>
+          <div class="actions-right">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="isSaving">
+              @if (isSaving) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Đang lưu...
+              } @else {
+                <i class="bi bi-check-circle me-2"></i>
+                {{ isEditMode ? 'Cập nhật danh mục' : 'Tạo danh mục' }}
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</div>

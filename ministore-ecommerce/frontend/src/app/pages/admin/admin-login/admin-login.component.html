@@ -1,0 +1,113 @@
+<div class="admin-login-page">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="bi bi-shield-check"></i>
+          <h1>Admin Panel</h1>
+        </div>
+        <p class="login-subtitle">Đăng nhập để quản trị hệ thống</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" #loginFormRef="ngForm" class="login-form">
+        <div class="form-group">
+          <label for="email" class="form-label">Email</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-envelope"></i>
+            </span>
+            <input
+              type="email"
+              id="email"
+              class="form-control"
+              [(ngModel)]="loginForm.email"
+              name="email"
+              placeholder="Nhập email của bạn"
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Mật khẩu</label>
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-lock"></i>
+            </span>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              class="form-control"
+              [(ngModel)]="loginForm.password"
+              name="password"
+              placeholder="Nhập mật khẩu"
+              required>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="togglePasswordVisibility()">
+              <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">
+              Ghi nhớ đăng nhập
+            </label>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="btn btn-primary btn-login w-100"
+          [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Đang đăng nhập...
+          } @else {
+            <i class="bi bi-box-arrow-in-right me-2"></i>
+            Đăng nhập
+          }
+        </button>
+      </form>
+
+      <div class="login-footer">
+        <button
+          type="button"
+          class="btn btn-link"
+          (click)="navigateToMainSite()">
+          <i class="bi bi-arrow-left me-1"></i>
+          Về trang chủ
+        </button>
+      </div>
+    </div>
+
+    <div class="login-info">
+      <div class="info-card">
+        <div class="info-icon">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <h3>Bảo mật cao</h3>
+        <p>Hệ thống được bảo vệ bởi các biện pháp bảo mật tiên tiến</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">
+          <i class="bi bi-speedometer2"></i>
+        </div>
+        <h3>Quản lý hiệu quả</h3>
+        <p>Dashboard trực quan với các công cụ quản lý mạnh mẽ</p>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">
+          <i class="bi bi-graph-up"></i>
+        </div>
+        <h3>Thống kê chi tiết</h3>
+        <p>Theo dõi và phân tích hiệu suất kinh doanh</p>
+      </div>
+    </div>
+  </div>
+</div>

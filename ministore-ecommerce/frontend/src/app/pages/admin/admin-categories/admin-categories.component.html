@@ -1,0 +1,177 @@
+<div class="admin-categories">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý danh mục</h1>
+        <p class="page-subtitle">Quản lý danh sách danh mục sản phẩm</p>
+      </div>
+      <div class="header-right">
+        <a routerLink="/admin/categories/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm danh mục
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-section">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="search-box">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm danh mục..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()"
+              (input)="onSearch()">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  @if (selectedCategories.size > 0) {
+    <div class="bulk-actions">
+      <div class="bulk-info">
+        <span class="selected-count">{{ selectedCategories.size }} danh mục đã chọn</span>
+      </div>
+      <div class="bulk-buttons">
+        <button 
+          class="btn btn-danger btn-sm" 
+          (click)="bulkDelete()"
+          [disabled]="isDeleting">
+          @if (isDeleting) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          } @else {
+            <i class="bi bi-trash me-2"></i>
+          }
+          Xóa đã chọn
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Categories Grid -->
+  <div class="categories-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách danh mục...</p>
+      </div>
+    } @else if (getFilteredCategories().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-tags"></i>
+        </div>
+        @if (searchQuery) {
+          <h3>Không tìm thấy danh mục</h3>
+          <p>Không có danh mục nào phù hợp với từ khóa "{{ searchQuery }}"</p>
+          <button class="btn btn-outline-primary" (click)="searchQuery = ''; onSearch()">
+            Xóa bộ lọc
+          </button>
+        } @else {
+          <h3>Chưa có danh mục nào</h3>
+          <p>Chưa có danh mục nào trong hệ thống.</p>
+          <a routerLink="/admin/categories/new" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>
+            Thêm danh mục đầu tiên
+          </a>
+        }
+      </div>
+    } @else {
+      <div class="categories-grid">
+        @for (category of getFilteredCategories(); track category.id) {
+          <div class="category-card" [class.selected]="selectedCategories.has(category.id)">
+            <div class="card-header">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  [checked]="selectedCategories.has(category.id)"
+                  (change)="toggleCategorySelection(category.id)">
+              </div>
+              <div class="card-actions">
+                <a [routerLink]="['/admin/categories', category.id, 'edit']" 
+                   class="btn btn-outline-primary btn-sm" 
+                   title="Sửa">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button 
+                  class="btn btn-outline-danger btn-sm" 
+                  (click)="deleteCategory(category)"
+                  [disabled]="isDeleting && deletingCategoryId === category.id"
+                  title="Xóa">
+                  @if (isDeleting && deletingCategoryId === category.id) {
+                    <span class="spinner-border spinner-border-sm"></span>
+                  } @else {
+                    <i class="bi bi-trash"></i>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="category-image">
+                @if (category.imageUrl) {
+                  <img [src]="category.imageUrl" [alt]="category.name" class="img-fluid">
+                } @else {
+                  <div class="placeholder-image">
+                    <i class="bi bi-image"></i>
+                  </div>
+                }
+              </div>
+
+              <div class="category-info">
+                <h5 class="category-name">{{ category.name }}</h5>
+                @if (category.description) {
+                  <p class="category-description">{{ category.description }}</p>
+                } @else {
+                  <p class="category-description text-muted">Không có mô tả</p>
+                }
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <div class="category-stats">
+                <span class="stat-item">
+                  <i class="bi bi-box-seam"></i>
+                  <span>Sản phẩm: 0</span>
+                </span>
+                <span class="stat-item">
+                  <i class="bi bi-eye"></i>
+                  <span>Lượt xem: 0</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Select All -->
+      @if (getFilteredCategories().length > 0) {
+        <div class="select-all-section">
+          <div class="form-check">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              [checked]="selectAll"
+              (change)="toggleSelectAll()">
+            <label class="form-check-label">
+              Chọn tất cả danh mục ({{ getFilteredCategories().length }})
+            </label>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,282 @@
+<div class="admin-user-form">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <nav class="breadcrumb">
+          <a routerLink="/admin/dashboard" class="breadcrumb-item">Dashboard</a>
+          <a routerLink="/admin/users" class="breadcrumb-item">Người dùng</a>
+          <span class="breadcrumb-item active">
+            {{ isEditMode ? 'Sửa người dùng' : 'Thêm người dùng mới' }}
+          </span>
+        </nav>
+        <h1 class="page-title">
+          {{ isEditMode ? 'Sửa người dùng' : 'Thêm người dùng mới' }}
+        </h1>
+        <p class="page-subtitle">
+          {{ isEditMode ? 'Cập nhật thông tin người dùng' : 'Tạo tài khoản người dùng mới' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="form-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải thông tin người dùng...</p>
+      </div>
+    } @else {
+      <form (ngSubmit)="onSubmit()" #userFormRef="ngForm" class="user-form">
+        <div class="row">
+          <!-- Left Column -->
+          <div class="col-lg-8">
+            <!-- Basic Information -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-person me-2"></i>
+                Thông tin cá nhân
+              </h3>
+              
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label required">Tên</label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    class="form-control"
+                    [(ngModel)]="userForm.firstName"
+                    name="firstName"
+                    placeholder="Nhập tên"
+                    required>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label required">Họ</label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    class="form-control"
+                    [(ngModel)]="userForm.lastName"
+                    name="lastName"
+                    placeholder="Nhập họ"
+                    required>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="email" class="form-label required">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    [(ngModel)]="userForm.email"
+                    name="email"
+                    placeholder="Nhập email"
+                    required>
+                </div>
+
+                <div class="col-md-6">
+                  <label for="phone" class="form-label">Số điện thoại</label>
+                  <input
+                    type="tel"
+                    id="phone"
+                    class="form-control"
+                    [(ngModel)]="userForm.phone"
+                    name="phone"
+                    placeholder="Nhập số điện thoại">
+                </div>
+
+                <div class="col-md-12">
+                  <label for="avatar" class="form-label">Avatar URL</label>
+                  <input
+                    type="url"
+                    id="avatar"
+                    class="form-control"
+                    [(ngModel)]="userForm.avatar"
+                    name="avatar"
+                    placeholder="https://example.com/avatar.jpg">
+                </div>
+              </div>
+            </div>
+
+            <!-- Password Section -->
+            @if (!isEditMode || userForm.password) {
+              <div class="form-section">
+                <h3 class="section-title">
+                  <i class="bi bi-lock me-2"></i>
+                  Mật khẩu
+                </h3>
+                
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="password" class="form-label" [class.required]="!isEditMode">
+                      {{ isEditMode ? 'Mật khẩu mới' : 'Mật khẩu' }}
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control"
+                      [(ngModel)]="userForm.password"
+                      name="password"
+                      placeholder="Nhập mật khẩu"
+                      [required]="!isEditMode">
+                    <div class="form-text">
+                      <button type="button" class="btn btn-sm btn-outline-secondary" (click)="generateRandomPassword()">
+                        <i class="bi bi-shuffle"></i> Tạo mật khẩu ngẫu nhiên
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="confirmPassword" class="form-label" [class.required]="!isEditMode || userForm.password">
+                      Xác nhận mật khẩu
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      class="form-control"
+                      [(ngModel)]="userForm.confirmPassword"
+                      name="confirmPassword"
+                      placeholder="Nhập lại mật khẩu"
+                      [required]="!isEditMode || userForm.password">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Right Column -->
+          <div class="col-lg-4">
+            <!-- Avatar Preview -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-image me-2"></i>
+                Avatar
+              </h3>
+              
+              <div class="avatar-preview">
+                <div class="preview-container">
+                  @if (userForm.avatar) {
+                    <img [src]="previewAvatar()" [alt]="userForm.firstName + ' ' + userForm.lastName" class="preview-image">
+                  } @else {
+                    <div class="avatar-placeholder">
+                      {{ getInitials() }}
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- User Settings -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-gear me-2"></i>
+                Cài đặt
+              </h3>
+              
+              <div class="settings-options">
+                <div class="form-group">
+                  <label for="role" class="form-label required">Vai trò</label>
+                  <select
+                    id="role"
+                    class="form-select"
+                    [(ngModel)]="userForm.role"
+                    name="role"
+                    required>
+                    @for (role of roleOptions; track role.value) {
+                      <option [value]="role.value">{{ role.label }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <div class="form-check form-switch">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      id="isActive"
+                      [(ngModel)]="userForm.isActive"
+                      name="isActive">
+                    <label class="form-check-label" for="isActive">
+                      Tài khoản hoạt động
+                    </label>
+                  </div>
+                  <div class="form-text">
+                    {{ userForm.isActive ? 'Người dùng có thể đăng nhập' : 'Tài khoản bị vô hiệu hóa' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- User Summary -->
+            <div class="form-section">
+              <h3 class="section-title">
+                <i class="bi bi-list-check me-2"></i>
+                Tóm tắt
+              </h3>
+              
+              <div class="summary-card">
+                <div class="summary-item">
+                  <span class="label">Tên đầy đủ:</span>
+                  <span class="value">{{ userForm.firstName }} {{ userForm.lastName }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Email:</span>
+                  <span class="value">{{ userForm.email || 'Chưa nhập' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Số điện thoại:</span>
+                  <span class="value">{{ userForm.phone || 'Chưa có' }}</span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Vai trò:</span>
+                  <span class="value">
+                    <span [class]="'badge ' + getRoleBadgeClass(userForm.role)">
+                      {{ getRoleLabel(userForm.role) }}
+                    </span>
+                  </span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Trạng thái:</span>
+                  <span class="value">
+                    <span [class]="'badge ' + (userForm.isActive ? 'bg-success' : 'bg-secondary')">
+                      {{ userForm.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}
+                    </span>
+                  </span>
+                </div>
+                <div class="summary-item">
+                  <span class="label">Avatar:</span>
+                  <span class="value">{{ userForm.avatar ? 'Có' : 'Không có' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-actions">
+          <div class="actions-left">
+            <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+              <i class="bi bi-arrow-left me-2"></i>
+              Quay lại
+            </button>
+          </div>
+          <div class="actions-right">
+            <button type="submit" class="btn btn-primary btn-lg" [disabled]="isSaving">
+              @if (isSaving) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Đang lưu...
+              } @else {
+                <i class="bi bi-check-circle me-2"></i>
+                {{ isEditMode ? 'Cập nhật người dùng' : 'Tạo người dùng' }}
+              }
+            </button>
+          </div>
+        </div>
+      </form>
+    }
+  </div>
+</div>

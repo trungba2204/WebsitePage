@@ -1,0 +1,238 @@
+<div class="admin-blogs">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý blog</h1>
+        <p class="page-subtitle">Quản lý bài viết và nội dung blog</p>
+      </div>
+      <div class="header-right">
+        <a routerLink="/admin/blogs/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>
+          Viết bài mới
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="search-box">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm bài viết..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()">
+            <button class="btn btn-outline-secondary" (click)="onSearch()">
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [value]="5">5 bài viết/trang</option>
+          <option [value]="10">10 bài viết/trang</option>
+          <option [value]="20">20 bài viết/trang</option>
+          <option [value]="50">50 bài viết/trang</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  @if (selectedBlogs.size > 0) {
+    <div class="bulk-actions">
+      <div class="bulk-info">
+        <span class="selected-count">{{ selectedBlogs.size }} bài viết đã chọn</span>
+      </div>
+      <div class="bulk-buttons">
+        <button 
+          class="btn btn-danger btn-sm" 
+          (click)="bulkDelete()"
+          [disabled]="isDeleting">
+          @if (isDeleting) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          } @else {
+            <i class="bi bi-trash me-2"></i>
+          }
+          Xóa đã chọn
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Blogs Table -->
+  <div class="blogs-table-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách bài viết...</p>
+      </div>
+    } @else if (blogs.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <h3>Chưa có bài viết nào</h3>
+        <p>Chưa có bài viết nào trong hệ thống.</p>
+        <a routerLink="/admin/blogs/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>
+          Viết bài đầu tiên
+        </a>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="50">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [checked]="selectAll"
+                    (change)="toggleSelectAll()">
+                </div>
+              </th>
+              <th width="120">Hình ảnh</th>
+              <th (click)="onSort('title')" class="sortable">
+                Tiêu đề
+                <i [class]="'bi ' + getSortIcon('title')"></i>
+              </th>
+              <th (click)="onSort('author')" class="sortable">
+                Tác giả
+                <i [class]="'bi ' + getSortIcon('author')"></i>
+              </th>
+              <th (click)="onSort('category')" class="sortable">
+                Danh mục
+                <i [class]="'bi ' + getSortIcon('category')"></i>
+              </th>
+              <th (click)="onSort('published')" class="sortable">
+                Trạng thái
+                <i [class]="'bi ' + getSortIcon('published')"></i>
+              </th>
+              <th (click)="onSort('createdAt')" class="sortable">
+                Ngày tạo
+                <i [class]="'bi ' + getSortIcon('createdAt')"></i>
+              </th>
+              <th width="120">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (blog of blogs; track blog.id) {
+              <tr [class.selected]="selectedBlogs.has(blog.id)">
+                <td>
+                  <div class="form-check">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      [checked]="selectedBlogs.has(blog.id)"
+                      (change)="toggleBlogSelection(blog.id)">
+                  </div>
+                </td>
+                <td>
+                  <div class="blog-image">
+                    <img [src]="blog.imageUrl" [alt]="blog.title" class="img-fluid">
+                  </div>
+                </td>
+                <td>
+                  <div class="blog-info">
+                    <h6 class="blog-title">{{ blog.title }}</h6>
+                    <small class="text-muted">{{ truncateText(blog.excerpt, 80) }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="author-info">
+                    @if (blog.authorAvatar) {
+                      <img [src]="blog.authorAvatar" [alt]="blog.author" class="author-avatar">
+                    } @else {
+                      <div class="author-avatar-placeholder">
+                        <i class="bi bi-person"></i>
+                      </div>
+                    }
+                    <span class="author-name">{{ blog.author }}</span>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ blog.category }}</span>
+                </td>
+                <td>
+                  <span [class]="'badge ' + getStatusBadgeClass(blog.published)">
+                    {{ getStatusText(blog.published) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(blog.createdAt) }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a [routerLink]="['/admin/blogs', blog.id, 'edit']" 
+                       class="btn btn-outline-primary btn-sm" 
+                       title="Sửa">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <button 
+                      class="btn btn-outline-danger btn-sm" 
+                      (click)="deleteBlog(blog)"
+                      [disabled]="isDeleting && deletingBlogId === blog.id"
+                      title="Xóa">
+                      @if (isDeleting && deletingBlogId === blog.id) {
+                        <span class="spinner-border spinner-border-sm"></span>
+                      } @else {
+                        <i class="bi bi-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination-container">
+          <nav aria-label="Blogs pagination">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 0">
+                <button class="page-link" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              
+              @for (page of getPageNumbers(); track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                  <button class="page-link" (click)="onPageChange(page)">
+                    {{ page + 1 }}
+                  </button>
+                </li>
+              }
+              
+              <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+                <button class="page-link" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+          
+          <div class="pagination-info">
+            Hiển thị {{ currentPage * pageSize + 1 }} - {{ getEndIndex() }} 
+            trong tổng số {{ totalElements }} bài viết
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

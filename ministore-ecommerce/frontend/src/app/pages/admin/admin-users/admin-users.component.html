@@ -1,0 +1,252 @@
+<div class="admin-users">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý người dùng</h1>
+        <p class="page-subtitle">Quản lý tài khoản người dùng và phân quyền</p>
+      </div>
+      <div class="header-right">
+        <a routerLink="/admin/users/new" class="btn btn-primary">
+          <i class="bi bi-person-plus me-2"></i>
+          Thêm người dùng
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="row g-3">
+      <div class="col-md-8">
+        <div class="search-box">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm theo tên, email..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()">
+            <button class="btn btn-outline-secondary" (click)="onSearch()">
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <select class="form-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [value]="5">5 người dùng/trang</option>
+          <option [value]="10">10 người dùng/trang</option>
+          <option [value]="20">20 người dùng/trang</option>
+          <option [value]="50">50 người dùng/trang</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  @if (selectedUsers.size > 0) {
+    <div class="bulk-actions">
+      <div class="bulk-info">
+        <span class="selected-count">{{ selectedUsers.size }} người dùng đã chọn</span>
+      </div>
+      <div class="bulk-buttons">
+        <button 
+          class="btn btn-danger btn-sm" 
+          (click)="bulkDelete()"
+          [disabled]="isDeleting">
+          @if (isDeleting) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          } @else {
+            <i class="bi bi-trash me-2"></i>
+          }
+          Xóa đã chọn
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Users Table -->
+  <div class="users-table-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách người dùng...</p>
+      </div>
+    } @else if (users.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-people"></i>
+        </div>
+        <h3>Chưa có người dùng nào</h3>
+        <p>Chưa có người dùng nào trong hệ thống.</p>
+        <a routerLink="/admin/users/new" class="btn btn-primary">
+          <i class="bi bi-person-plus me-2"></i>
+          Thêm người dùng đầu tiên
+        </a>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="50">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [checked]="selectAll"
+                    (change)="toggleSelectAll()">
+                </div>
+              </th>
+              <th width="80">Avatar</th>
+              <th (click)="onSort('firstName')" class="sortable">
+                Tên
+                <i [class]="'bi ' + getSortIcon('firstName')"></i>
+              </th>
+              <th (click)="onSort('email')" class="sortable">
+                Email
+                <i [class]="'bi ' + getSortIcon('email')"></i>
+              </th>
+              <th (click)="onSort('role')" class="sortable">
+                Vai trò
+                <i [class]="'bi ' + getSortIcon('role')"></i>
+              </th>
+              <th (click)="onSort('isActive')" class="sortable">
+                Trạng thái
+                <i [class]="'bi ' + getSortIcon('isActive')"></i>
+              </th>
+              <th (click)="onSort('createdAt')" class="sortable">
+                Ngày tạo
+                <i [class]="'bi ' + getSortIcon('createdAt')"></i>
+              </th>
+              <th width="120">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of users; track user.id) {
+              <tr [class.selected]="selectedUsers.has(user.id)">
+                <td>
+                  <div class="form-check">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      [checked]="selectedUsers.has(user.id)"
+                      (change)="toggleUserSelection(user.id)">
+                  </div>
+                </td>
+                <td>
+                  <div class="user-avatar">
+                    @if (user.avatar) {
+                      <img [src]="user.avatar" [alt]="user.firstName + ' ' + user.lastName" class="avatar-image">
+                    } @else {
+                      <div class="avatar-placeholder">
+                        {{ getInitials(user.firstName, user.lastName) }}
+                      </div>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <div class="user-info">
+                    <h6 class="user-name">{{ user.firstName }} {{ user.lastName }}</h6>
+                    <small class="text-muted">{{ user.phone || 'Chưa có số điện thoại' }}</small>
+                  </div>
+                </td>
+                <td>
+                  <div class="email-info">
+                    <span class="email">{{ user.email }}</span>
+                    @if (user.emailVerified) {
+                      <i class="bi bi-check-circle-fill text-success" title="Email đã xác thực"></i>
+                    } @else {
+                      <i class="bi bi-exclamation-circle text-warning" title="Email chưa xác thực"></i>
+                    }
+                  </div>
+                </td>
+                <td>
+                  <span [class]="'badge ' + getRoleBadgeClass(user.role)">
+                    {{ getRoleText(user.role) }}
+                  </span>
+                </td>
+                <td>
+                  <div class="status-section">
+                    <span [class]="'badge ' + getStatusBadgeClass(user.isActive)">
+                      {{ getStatusText(user.isActive) }}
+                    </span>
+                    <button 
+                      class="btn btn-sm btn-outline-secondary ms-2" 
+                      (click)="toggleUserStatus(user)"
+                      [title]="user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'">
+                      <i [class]="user.isActive ? 'bi bi-toggle-on' : 'bi bi-toggle-off'"></i>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(user.createdAt) }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a [routerLink]="['/admin/users', user.id, 'edit']" 
+                       class="btn btn-outline-primary btn-sm" 
+                       title="Sửa">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <button 
+                      class="btn btn-outline-danger btn-sm" 
+                      (click)="deleteUser(user)"
+                      [disabled]="isDeleting && deletingUserId === user.id"
+                      title="Xóa">
+                      @if (isDeleting && deletingUserId === user.id) {
+                        <span class="spinner-border spinner-border-sm"></span>
+                      } @else {
+                        <i class="bi bi-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination-container">
+          <nav aria-label="Users pagination">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 0">
+                <button class="page-link" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              
+              @for (page of getPageNumbers(); track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                  <button class="page-link" (click)="onPageChange(page)">
+                    {{ page + 1 }}
+                  </button>
+                </li>
+              }
+              
+              <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+                <button class="page-link" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+          
+          <div class="pagination-info">
+            Hiển thị {{ currentPage * pageSize + 1 }} - {{ getEndIndex() }} 
+            trong tổng số {{ totalElements }} người dùng
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

@@ -1,0 +1,248 @@
+<div class="admin-products">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý sản phẩm</h1>
+        <p class="page-subtitle">Quản lý danh sách sản phẩm của cửa hàng</p>
+      </div>
+      <div class="header-right">
+        <a routerLink="/admin/products/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm sản phẩm
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters and Search -->
+  <div class="filters-section">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <div class="search-box">
+          <div class="input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Tìm kiếm sản phẩm..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="onSearch()">
+            <button class="btn btn-outline-secondary" (click)="onSearch()">
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="selectedCategoryId" (change)="onCategoryFilter()">
+          <option value="">Tất cả danh mục</option>
+          @for (category of categories; track category.id) {
+            <option [value]="category.id">{{ category.name }}</option>
+          }
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+          <option [value]="5">5 sản phẩm/trang</option>
+          <option [value]="10">10 sản phẩm/trang</option>
+          <option [value]="20">20 sản phẩm/trang</option>
+          <option [value]="50">50 sản phẩm/trang</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bulk Actions -->
+  @if (selectedProducts.size > 0) {
+    <div class="bulk-actions">
+      <div class="bulk-info">
+        <span class="selected-count">{{ selectedProducts.size }} sản phẩm đã chọn</span>
+      </div>
+      <div class="bulk-buttons">
+        <button 
+          class="btn btn-danger btn-sm" 
+          (click)="bulkDelete()"
+          [disabled]="isDeleting">
+          @if (isDeleting) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          } @else {
+            <i class="bi bi-trash me-2"></i>
+          }
+          Xóa đã chọn
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Products Table -->
+  <div class="products-table-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách sản phẩm...</p>
+      </div>
+    } @else if (products.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <h3>Không có sản phẩm nào</h3>
+        <p>Chưa có sản phẩm nào trong hệ thống.</p>
+        <a routerLink="/admin/products/new" class="btn btn-primary">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm sản phẩm đầu tiên
+        </a>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="50">
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    [checked]="selectAll"
+                    (change)="toggleSelectAll()">
+                </div>
+              </th>
+              <th width="80">Hình ảnh</th>
+              <th (click)="onSort('name')" class="sortable">
+                Tên sản phẩm
+                <i [class]="'bi ' + getSortIcon('name')"></i>
+              </th>
+              <th (click)="onSort('category.name')" class="sortable">
+                Danh mục
+                <i [class]="'bi ' + getSortIcon('category.name')"></i>
+              </th>
+              <th (click)="onSort('price')" class="sortable">
+                Giá
+                <i [class]="'bi ' + getSortIcon('price')"></i>
+              </th>
+              <th (click)="onSort('stock')" class="sortable">
+                Tồn kho
+                <i [class]="'bi ' + getSortIcon('stock')"></i>
+              </th>
+              <th (click)="onSort('rating')" class="sortable">
+                Đánh giá
+                <i [class]="'bi ' + getSortIcon('rating')"></i>
+              </th>
+              <th width="120">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (product of products; track product.id) {
+              <tr [class.selected]="selectedProducts.has(product.id)">
+                <td>
+                  <div class="form-check">
+                    <input 
+                      class="form-check-input" 
+                      type="checkbox" 
+                      [checked]="selectedProducts.has(product.id)"
+                      (change)="toggleProductSelection(product.id)">
+                  </div>
+                </td>
+                <td>
+                  <div class="product-image">
+                    <img [src]="product.imageUrl" [alt]="product.name" class="img-fluid">
+                  </div>
+                </td>
+                <td>
+                  <div class="product-info">
+                    <h6 class="product-name">{{ product.name }}</h6>
+                    <small class="text-muted">{{ product.description.substring(0, 100) }}...</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary">{{ getCategoryName(product.category.id) }}</span>
+                </td>
+                <td>
+                  <span class="price">{{ formatPrice(product.price) }}</span>
+                </td>
+                <td>
+                  <span [class]="'stock-badge ' + (product.stock > 0 ? 'in-stock' : 'out-of-stock')">
+                    {{ product.stock }}
+                  </span>
+                </td>
+                <td>
+                  @if (product.rating) {
+                    <div class="rating">
+                      <div class="stars">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <i [class]="'bi ' + (star <= product.rating ? 'bi-star-fill' : 'bi-star')"></i>
+                        }
+                      </div>
+                      <small class="rating-text">{{ product.rating }}</small>
+                    </div>
+                  } @else {
+                    <span class="text-muted">Chưa có</span>
+                  }
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <a [routerLink]="['/admin/products', product.id, 'edit']" 
+                       class="btn btn-outline-primary btn-sm" 
+                       title="Sửa">
+                      <i class="bi bi-pencil"></i>
+                    </a>
+                    <button 
+                      class="btn btn-outline-danger btn-sm" 
+                      (click)="deleteProduct(product)"
+                      [disabled]="isDeleting && deletingProductId === product.id"
+                      title="Xóa">
+                      @if (isDeleting && deletingProductId === product.id) {
+                        <span class="spinner-border spinner-border-sm"></span>
+                      } @else {
+                        <i class="bi bi-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination-container">
+          <nav aria-label="Products pagination">
+            <ul class="pagination justify-content-center">
+              <li class="page-item" [class.disabled]="currentPage === 0">
+                <button class="page-link" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
+                  <i class="bi bi-chevron-left"></i>
+                </button>
+              </li>
+              
+              @for (page of getPageNumbers(); track page) {
+                <li class="page-item" [class.active]="page === currentPage">
+                  <button class="page-link" (click)="onPageChange(page)">
+                    {{ page + 1 }}
+                  </button>
+                </li>
+              }
+              
+              <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+                <button class="page-link" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                  <i class="bi bi-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+          
+          <div class="pagination-info">
+            Hiển thị {{ currentPage * pageSize + 1 }} - {{ getEndIndex() }} 
+            trong tổng số {{ totalElements }} sản phẩm
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

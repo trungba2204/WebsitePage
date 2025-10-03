@@ -1,0 +1,220 @@
+<div class="about-page">
+  <!-- Hero Section -->
+  <section class="about-hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-12 col-lg-6 order-2 order-lg-1">
+          <div class="hero-content">
+            <h1 class="display-4 fw-bold text-primary mb-3 mb-md-4">Về MiniStore</h1>
+            <p class="lead text-muted mb-3 mb-md-4">
+              Chúng tôi là <strong class="text-success">Team Đoàn Kết Hai Bà Trưng</strong> - một nền tảng thương mại điện tử hiện đại, 
+              cam kết mang đến trải nghiệm mua sắm tuyệt vời và sản phẩm chất lượng cao cho người dùng Việt Nam.
+            </p>
+            <p class="text-muted mb-3 mb-md-4">
+              Với tinh thần đoàn kết và sáng tạo, Team Đoàn Kết Hai Bà Trưng đã xây dựng MiniStore trở thành 
+              lựa chọn tin cậy của hàng triệu khách hàng trên toàn quốc.
+            </p>
+            <div class="team-intro-badge mt-3 mt-md-4">
+              <span class="badge bg-success fs-5 fs-md-6 px-3 px-md-4 py-2">
+                <i class="bi bi-people-fill me-2"></i>
+                <span class="d-none d-sm-inline">Team Đoàn Kết Hai Bà Trưng - Đoàn kết, Sáng tạo, Thành công</span>
+                <span class="d-sm-none">Team Đoàn Kết Hai Bà Trưng</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-lg-6 order-1 order-lg-2">
+          <div class="hero-image">
+            <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600" 
+                 alt="About MiniStore" 
+                 class="img-fluid rounded-3 shadow">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission & Vision -->
+  <section class="mission-vision py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-md-6 mb-4 mb-md-0">
+          <div class="mission-card h-100">
+            <div class="card-body text-center p-4 p-md-5">
+              <div class="mission-icon mb-3 mb-md-4">
+                <i class="bi bi-bullseye text-primary mission-vision-icon"></i>
+              </div>
+              <h3 class="card-title mb-2 mb-md-3">Sứ mệnh</h3>
+              <p class="card-text text-muted">
+                Mang đến cho khách hàng trải nghiệm mua sắm trực tuyến tiện lợi, an toàn và thú vị nhất. 
+                Chúng tôi cam kết cung cấp sản phẩm chất lượng cao với giá cả hợp lý và dịch vụ khách hàng xuất sắc.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-6">
+          <div class="vision-card h-100">
+            <div class="card-body text-center p-4 p-md-5">
+              <div class="vision-icon mb-3 mb-md-4">
+                <i class="bi bi-eye text-primary mission-vision-icon"></i>
+              </div>
+              <h3 class="card-title mb-2 mb-md-3">Tầm nhìn</h3>
+              <p class="card-text text-muted">
+                Trở thành nền tảng thương mại điện tử hàng đầu Việt Nam, được yêu thích và tin tưởng bởi 
+                người tiêu dùng và đối tác. Chúng tôi hướng tới việc xây dựng một hệ sinh thái mua sắm 
+                hoàn chỉnh và bền vững.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Company Values -->
+  <section class="company-values py-5 bg-light">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-3">Giá trị cốt lõi</h2>
+        <h3 class="text-success fw-bold mb-3">Team Đoàn Kết Hai Bà Trưng</h3>
+        <p class="lead text-muted">Những nguyên tắc và giá trị định hướng mọi hoạt động của Team Đoàn Kết Hai Bà Trưng</p>
+      </div>
+      
+      <div class="row">
+        @for (value of values; track value.title) {
+          <div class="col-lg-3 col-md-6 mb-4">
+            <div class="value-card text-center h-100">
+              <div class="card-body p-4">
+                <div class="value-icon mb-3">
+                  <i [class]="'bi ' + value.icon + ' text-primary'" style="font-size: 2.5rem;"></i>
+                </div>
+                <h4 class="card-title mb-3">{{ value.title }}</h4>
+                <p class="card-text text-muted">{{ value.description }}</p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="team-section py-5">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-3">Đội ngũ của chúng tôi</h2>
+        <h3 class="text-success fw-bold mb-3">🏆 Team Đoàn Kết Hai Bà Trưng 🏆</h3>
+        <p class="lead text-muted">Những con người tài năng và tận tâm đứng sau sự thành công của MiniStore</p>
+        <div class="team-badge">
+          <span class="badge bg-success fs-6 px-4 py-2">
+            <i class="bi bi-trophy me-2"></i>
+            Team Đoàn Kết Hai Bà Trưng - Đoàn kết, Sáng tạo, Thành công
+          </span>
+        </div>
+      </div>
+      
+      <div class="row justify-content-center">
+        @for (member of teamMembers; track member.name) {
+          <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 mb-4">
+            <div class="team-card text-center h-100">
+              <div class="card-body p-4 p-md-5">
+                <div class="team-image mb-3 mb-md-4">
+                  <img [src]="member.image" 
+                       [alt]="member.name" 
+                       class="rounded-circle shadow team-avatar"
+                       style="width: 150px; height: 150px; object-fit: cover;">
+                </div>
+                <h4 class="card-title mb-2 mb-md-3 text-success team-name">{{ member.name }}</h4>
+                <p class="text-primary fw-bold mb-3 mb-md-4 fs-5 team-position">{{ member.position }}</p>
+                <p class="card-text text-muted team-bio">{{ member.bio }}</p>
+                <div class="team-signature mt-3 mt-md-4">
+                  <span class="badge bg-success fs-6 px-3 px-md-4 py-2">
+                    <i class="bi bi-trophy me-2"></i>
+                    <span class="d-none d-sm-inline">Đoàn kết - Sáng tạo - Thành công</span>
+                    <span class="d-sm-none">Đoàn kết - Thành công</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section class="timeline-section py-5 bg-light">
+    <div class="container">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-3">Hành trình phát triển</h2>
+        <p class="lead text-muted">Những cột mốc quan trọng trong quá trình xây dựng MiniStore</p>
+      </div>
+      
+      <div class="timeline">
+        @for (milestone of milestones; track milestone.year) {
+          <div class="timeline-item">
+            <div class="timeline-marker">
+              <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-year">{{ milestone.year }}</div>
+              <h4 class="timeline-title">{{ milestone.title }}</h4>
+              <p class="timeline-description">{{ milestone.description }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section py-5">
+    <div class="container">
+      <div class="row text-center">
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold display-4">1M+</div>
+            <div class="stat-label text-muted">Khách hàng</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold display-4">50K+</div>
+            <div class="stat-label text-muted">Sản phẩm</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold display-4">1K+</div>
+            <div class="stat-label text-muted">Đối tác</div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold display-4">99%</div>
+            <div class="stat-label text-muted">Hài lòng</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section py-5 bg-primary text-white">
+    <div class="container text-center">
+      <h2 class="display-5 fw-bold mb-3">Sẵn sàng trải nghiệm?</h2>
+      <h3 class="text-warning fw-bold mb-3">🏆 Team Đoàn Kết Hai Bà Trưng 🏆</h3>
+      <p class="lead mb-4">Tham gia cùng hàng triệu khách hàng đã tin tưởng MiniStore và Team Đoàn Kết Hai Bà Trưng</p>
+      <div class="cta-buttons">
+        <a routerLink="/products" class="btn btn-light btn-lg me-3">
+          <i class="bi bi-shop me-2"></i>
+          Mua sắm ngay
+        </a>
+        <a routerLink="/contact" class="btn btn-outline-light btn-lg">
+          <i class="bi bi-envelope me-2"></i>
+          Liên hệ với Team Đoàn Kết Hai Bà Trưng
+        </a>
+      </div>
+    </div>
+  </section>
+</div>

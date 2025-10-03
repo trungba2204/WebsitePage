@@ -1,0 +1,46 @@
+<a [routerLink]="['/products', product.id]" class="product-card">
+  <div class="product-image">
+    <img [src]="product.imageUrl" [alt]="product.name" />
+    @if (product.stock === 0) {
+      <div class="out-of-stock-badge">Hết hàng</div>
+    }
+  </div>
+  
+  <div class="product-info">
+    <h3 class="product-name">{{ product.name }}</h3>
+    <p class="product-category">{{ product.category }}</p>
+    
+    <div class="product-footer">
+      <div class="product-price">
+        <span class="price">{{ formatPrice(product.price) }}</span>
+      </div>
+      
+      @if (product.rating) {
+        <div class="product-rating">
+          <i class="bi bi-star-fill"></i>
+          <span>{{ product.rating }}</span>
+          @if (product.reviews) {
+            <span class="reviews">({{ product.reviews }})</span>
+          }
+        </div>
+      }
+    </div>
+    
+    <button 
+      class="btn-add-cart"
+      [disabled]="product.stock === 0 || isAddingToCart"
+      (click)="addToCart($event)">
+      @if (isAddingToCart) {
+        <i class="bi bi-arrow-repeat spinning"></i>
+        Đang thêm...
+      } @else if (product.stock === 0) {
+        <i class="bi bi-x-circle"></i>
+        Hết hàng
+      } @else {
+        <i class="bi bi-cart-plus"></i>
+        Thêm vào giỏ
+      }
+    </button>
+  </div>
+</a>
+

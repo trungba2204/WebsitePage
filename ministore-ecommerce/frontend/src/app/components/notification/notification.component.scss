@@ -1,0 +1,152 @@
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  max-width: 400px;
+  width: 100%;
+}
+
+.notification {
+  margin-bottom: 1rem;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
+  
+  &.alert-success {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+    color: #155724;
+    
+    .bi {
+      color: #28a745;
+    }
+  }
+  
+  &.alert-danger {
+    background-color: #f8d7da;
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+    
+    .bi {
+      color: #dc3545;
+    }
+  }
+  
+  &.alert-info {
+    background-color: #d1ecf1;
+    border-left: 4px solid #17a2b8;
+    color: #0c5460;
+    
+    .bi {
+      color: #17a2b8;
+    }
+  }
+  
+  &.alert-warning {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    color: #856404;
+    
+    .bi {
+      color: #ffc107;
+    }
+  }
+  
+  .notification-content {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    
+    .bi {
+      font-size: 1.25rem;
+      margin-right: 0.75rem;
+      margin-top: 0.125rem;
+      flex-shrink: 0;
+    }
+    
+    .notification-text {
+      flex: 1;
+      
+      strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+      }
+      
+      p {
+        font-size: 0.875rem;
+        line-height: 1.4;
+        margin: 0;
+      }
+    }
+  }
+  
+  .btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+    
+    .bi {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .notification-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .notification {
+    .notification-content {
+      padding: 0.875rem;
+      
+      .bi {
+        font-size: 1.125rem;
+        margin-right: 0.5rem;
+      }
+      
+      .notification-text {
+        strong {
+          font-size: 0.9rem;
+        }
+        
+        p {
+          font-size: 0.8rem;
+        }
+      }
+    }
+  }
+}

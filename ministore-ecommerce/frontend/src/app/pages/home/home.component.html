@@ -1,0 +1,163 @@
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <div class="hero-content">
+          <span class="hero-badge">🎉 Sale up to 50%</span>
+          <h1 class="hero-title">
+            Khám phá thế giới 
+            <span class="text-primary">mua sắm</span> 
+            tuyệt vời
+          </h1>
+          <p class="hero-description">
+            Tìm kiếm và mua sắm hàng ngàn sản phẩm chất lượng cao với giá cả hợp lý. 
+            Giao hàng nhanh chóng và dịch vụ khách hàng tận tình.
+          </p>
+          <div class="hero-actions">
+            <a routerLink="/products" class="btn btn-primary btn-lg">
+              <i class="bi bi-bag me-2"></i>
+              Mua sắm ngay
+            </a>
+            <a routerLink="/products" class="btn btn-outline-primary btn-lg">
+              <i class="bi bi-search me-2"></i>
+              Khám phá thêm
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">10K+</span>
+              <span class="stat-label">Sản phẩm</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">5K+</span>
+              <span class="stat-label">Khách hàng</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">99%</span>
+              <span class="stat-label">Hài lòng</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-image">
+          <img src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=600&h=400&fit=crop" 
+               alt="Shopping" class="img-fluid rounded-3 shadow-lg">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Section -->
+@if (categories.length > 0) {
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Danh mục sản phẩm</h2>
+        <a routerLink="/products" class="view-all">
+          Xem tất cả <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="categories-grid">
+        @for (category of categories; track category.id) {
+          <a [routerLink]="['/products']" [queryParams]="{category: category.id}" class="category-card">
+            @if (category.imageUrl) {
+              <div class="category-image">
+                <img [src]="category.imageUrl" [alt]="category.name" />
+              </div>
+            }
+            <div class="category-info">
+              <h3>{{ category.name }}</h3>
+              @if (category.description) {
+                <p>{{ category.description }}</p>
+              }
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Featured Products Section -->
+@if (featuredProducts.length > 0) {
+  <section class="section bg-light">
+    <div class="container">
+      <div class="section-header">
+        <h2>Sản phẩm nổi bật</h2>
+        <a routerLink="/products" class="view-all">
+          Xem tất cả <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="products-grid">
+        @for (product of featuredProducts; track product.id) {
+          <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- New Arrivals Section -->
+@if (newArrivals.length > 0) {
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2>Sản phẩm mới</h2>
+        <a routerLink="/products" class="view-all">
+          Xem tất cả <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+      
+      <div class="products-grid">
+        @for (product of newArrivals; track product.id) {
+          <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Features Section -->
+<section class="section bg-light">
+  <div class="container">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-truck"></i>
+        </div>
+        <h3>Miễn phí vận chuyển</h3>
+        <p>Cho đơn hàng từ 500.000đ</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <h3>Thanh toán an toàn</h3>
+        <p>Bảo mật 100%</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <h3>Đổi trả dễ dàng</h3>
+        <p>Trong vòng 30 ngày</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="bi bi-headset"></i>
+        </div>
+        <h3>Hỗ trợ 24/7</h3>
+        <p>Tư vấn nhiệt tình</p>
+      </div>
+    </div>
+  </div>
+</section>
+

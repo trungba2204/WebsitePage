@@ -1,0 +1,210 @@
+<div class="products-page">
+  <div class="container">
+    <div class="page-header">
+      <h1>Sản phẩm</h1>
+      <p>Khám phá bộ sưu tập sản phẩm đa dạng của chúng tôi</p>
+    </div>
+
+    <!-- Mobile Filter Toggle -->
+    <div class="mobile-filter-toggle d-lg-none">
+      <button class="btn btn-outline-primary" (click)="toggleFilters()">
+        <i class="bi bi-funnel me-2"></i>
+        Bộ lọc
+        <span class="badge bg-primary ms-2">{{ getActiveFilterCount() }}</span>
+      </button>
+    </div>
+
+    <div class="products-layout">
+      <!-- Sidebar -->
+      <aside class="sidebar" [class.show]="showFilters">
+        <div class="sidebar-header d-lg-none">
+          <h3>Bộ lọc</h3>
+          <button class="btn-close" (click)="showFilters = false">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+
+        <!-- Categories Filter -->
+        <div class="filter-section">
+          <h4>Danh mục</h4>
+          <div class="filter-options">
+            <label class="filter-option">
+              <input 
+                type="radio" 
+                name="category" 
+                [checked]="!filter.categoryId"
+                (change)="onCategoryChange(undefined)" />
+              <span>Tất cả danh mục</span>
+              <span class="count">({{ getTotalProducts() }})</span>
+            </label>
+            @for (category of categories; track category.id) {
+              <label class="filter-option">
+                <input 
+                  type="radio" 
+                  name="category" 
+                  [checked]="filter.categoryId === category.id"
+                  (change)="onCategoryChange(category.id)" />
+                <span>{{ category.name }}</span>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Price Filter -->
+        <div class="filter-section">
+          <h4>Khoảng giá</h4>
+          <div class="price-range">
+            <div class="price-inputs">
+              <div class="input-group">
+                <span class="input-group-text">Từ</span>
+                <input 
+                  type="number" 
+                  [(ngModel)]="priceRange.min"
+                  (change)="onPriceRangeChange()"
+                  class="form-control"
+                  placeholder="0" />
+              </div>
+              <div class="input-group">
+                <span class="input-group-text">Đến</span>
+                <input 
+                  type="number" 
+                  [(ngModel)]="priceRange.max"
+                  (change)="onPriceRangeChange()"
+                  class="form-control"
+                  placeholder="10,000,000" />
+              </div>
+            </div>
+            <div class="price-display">
+              {{ formatPrice(priceRange.min) }} - {{ formatPrice(priceRange.max) }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating Filter -->
+        <div class="filter-section">
+          <h4>Đánh giá</h4>
+          <div class="rating-filter">
+            @for (star of [5,4,3,2,1]; track star) {
+              <label class="rating-option">
+                <input 
+                  type="radio" 
+                  name="rating" 
+                  [value]="star"
+                  [checked]="selectedRating === star"
+                  (change)="onRatingChange(star)" />
+                <div class="stars">
+                  @for (s of [1,2,3,4,5]; track s) {
+                    <i class="bi" [ngClass]="s <= star ? 'bi-star-fill' : 'bi-star'"></i>
+                  }
+                  <span>& trở lên</span>
+                </div>
+              </label>
+            }
+            <label class="rating-option">
+              <input 
+                type="radio" 
+                name="rating" 
+                value="0"
+                [checked]="selectedRating === 0"
+                (change)="onRatingChange(0)" />
+              <span>Tất cả đánh giá</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Stock Filter -->
+        <div class="filter-section">
+          <h4>Tình trạng</h4>
+          <div class="filter-options">
+            <label class="filter-option checkbox-option">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="inStockOnly"
+                (change)="onStockFilterChange()" />
+              <span>Chỉ hiển thị sản phẩm còn hàng</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Clear Filters -->
+        <div class="filter-actions">
+          <button class="btn btn-outline-secondary w-100" (click)="clearFilters()">
+            <i class="bi bi-arrow-clockwise me-2"></i>
+            Xóa tất cả bộ lọc
+          </button>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="main-content">
+        <!-- Toolbar -->
+        <div class="toolbar">
+          <div class="results-info">
+            @if (!isLoading) {
+              <span>Tìm thấy {{ products.length }} sản phẩm</span>
+            }
+          </div>
+          
+          <div class="sort-options">
+            <label>Sắp xếp:</label>
+            <select [(ngModel)]="filter.sortBy" (change)="onSortChange()" class="form-control">
+              <option value="createdAt">Mới nhất</option>
+              <option value="name">Tên A-Z</option>
+              <option value="price">Giá tăng dần</option>
+              <option value="price" [value]="'price-desc'">Giá giảm dần</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        @if (isLoading) {
+          <div class="loading">
+            <i class="bi bi-arrow-repeat spinning"></i>
+            <p>Đang tải sản phẩm...</p>
+          </div>
+        } @else if (products.length === 0) {
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h3>Không tìm thấy sản phẩm</h3>
+            <p>Thử thay đổi bộ lọc hoặc tìm kiếm khác</p>
+          </div>
+        } @else {
+          <div class="products-grid">
+            @for (product of products; track product.id) {
+              <app-product-card [product]="product"></app-product-card>
+            }
+          </div>
+
+          <!-- Pagination -->
+          @if (totalPages > 1) {
+            <div class="pagination">
+              <button 
+                class="page-btn"
+                [disabled]="currentPage === 0"
+                (click)="onPageChange(currentPage - 1)">
+                <i class="bi bi-chevron-left"></i>
+              </button>
+              
+              @for (page of pages; track page) {
+                <button 
+                  class="page-btn"
+                  [class.active]="page === currentPage"
+                  (click)="onPageChange(page)">
+                  {{ page + 1 }}
+                </button>
+              }
+              
+              <button 
+                class="page-btn"
+                [disabled]="currentPage === totalPages - 1"
+                (click)="onPageChange(currentPage + 1)">
+                <i class="bi bi-chevron-right"></i>
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</div>
+

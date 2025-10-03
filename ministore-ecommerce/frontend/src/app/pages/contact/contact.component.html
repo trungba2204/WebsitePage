@@ -1,0 +1,226 @@
+<div class="contact-page">
+  <!-- Hero Section -->
+  <section class="contact-hero">
+    <div class="container">
+      <div class="text-center py-5">
+        <h1 class="display-4 fw-bold text-primary mb-3">Liên hệ với chúng tôi</h1>
+        <p class="lead text-muted">Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="container py-5">
+    <div class="row">
+      <!-- Contact Form -->
+      <div class="col-lg-8 mb-5">
+        <div class="contact-form-card">
+          <div class="card">
+            <div class="card-header bg-primary text-white">
+              <h3 class="mb-0">
+                <i class="bi bi-envelope me-2"></i>
+                Gửi tin nhắn cho chúng tôi
+              </h3>
+            </div>
+            <div class="card-body p-4">
+              <form (ngSubmit)="onSubmit()" #contactFormRef="ngForm">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Họ và tên *</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="name"
+                      [(ngModel)]="contactForm.name"
+                      name="name"
+                      placeholder="Nhập họ và tên"
+                      required>
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email"
+                      [(ngModel)]="contactForm.email"
+                      name="email"
+                      placeholder="Nhập email của bạn"
+                      required>
+                  </div>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Số điện thoại</label>
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="phone"
+                      [(ngModel)]="contactForm.phone"
+                      name="phone"
+                      placeholder="Nhập số điện thoại">
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label for="subject" class="form-label">Chủ đề *</label>
+                    <select 
+                      class="form-select" 
+                      id="subject"
+                      [(ngModel)]="contactForm.subject"
+                      name="subject"
+                      required>
+                      <option value="">Chọn chủ đề</option>
+                      <option value="general">Thông tin chung</option>
+                      <option value="support">Hỗ trợ kỹ thuật</option>
+                      <option value="billing">Vấn đề thanh toán</option>
+                      <option value="shipping">Vấn đề giao hàng</option>
+                      <option value="return">Đổi trả sản phẩm</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div class="mb-4">
+                  <label for="message" class="form-label">Nội dung tin nhắn *</label>
+                  <textarea 
+                    class="form-control" 
+                    id="message"
+                    [(ngModel)]="contactForm.message"
+                    name="message"
+                    rows="6"
+                    placeholder="Nhập nội dung tin nhắn của bạn..."
+                    required></textarea>
+                </div>
+                
+                <div class="text-end">
+                  <button 
+                    type="submit" 
+                    class="btn btn-primary btn-lg"
+                    [disabled]="isSubmitting">
+                    @if (isSubmitting) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                      Đang gửi...
+                    } @else {
+                      <i class="bi bi-send me-2"></i>
+                      Gửi tin nhắn
+                    }
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="col-lg-4">
+        <div class="contact-info">
+          <!-- Contact Details -->
+          <div class="contact-details mb-4">
+            <h3 class="mb-4">Thông tin liên hệ</h3>
+            @for (info of contactInfo; track info.title) {
+              <div class="contact-item d-flex mb-4">
+                <div class="contact-icon me-3">
+                  <i [class]="'bi ' + info.icon + ' ' + info.color" style="font-size: 1.5rem;"></i>
+                </div>
+                <div class="contact-content">
+                  <h5 class="contact-title mb-2">{{ info.title }}</h5>
+                  @for (detail of info.details; track detail) {
+                    <p class="contact-detail text-muted mb-1">{{ detail }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Social Media -->
+          <div class="social-media mb-4">
+            <h4 class="mb-3">Theo dõi chúng tôi</h4>
+            <div class="social-links">
+              <a href="#" class="social-link me-3" title="Facebook">
+                <i class="bi bi-facebook text-primary"></i>
+              </a>
+              <a href="#" class="social-link me-3" title="Instagram">
+                <i class="bi bi-instagram text-danger"></i>
+              </a>
+              <a href="#" class="social-link me-3" title="Twitter">
+                <i class="bi bi-twitter text-info"></i>
+              </a>
+              <a href="#" class="social-link me-3" title="LinkedIn">
+                <i class="bi bi-linkedin text-primary"></i>
+              </a>
+              <a href="#" class="social-link" title="YouTube">
+                <i class="bi bi-youtube text-danger"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Map Placeholder -->
+          <div class="map-placeholder">
+            <div class="map-card">
+              <div class="map-header">
+                <h5 class="mb-0">
+                  <i class="bi bi-map me-2"></i>
+                  Vị trí văn phòng
+                </h5>
+              </div>
+              <div class="map-content">
+                <div class="map-image">
+                  <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?w=400" 
+                       alt="Map Location" 
+                       class="img-fluid rounded">
+                </div>
+                <div class="map-overlay">
+                  <button class="btn btn-primary btn-sm">
+                    <i class="bi bi-geo-alt me-1"></i>
+                    Xem bản đồ
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section mt-5">
+      <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold text-primary mb-3">Câu hỏi thường gặp</h2>
+        <p class="lead text-muted">Tìm câu trả lời cho những thắc mắc phổ biến</p>
+      </div>
+      
+      <div class="row">
+        <div class="col-lg-8 mx-auto">
+          <div class="accordion" id="faqAccordion">
+            @for (faq of faqs; track faq.question; let i = $index) {
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ i }}">
+                  <button 
+                    class="accordion-button collapsed" 
+                    type="button" 
+                    [class.collapsed]="expandedFaq !== i"
+                    (click)="toggleFaq(i)"
+                    data-bs-toggle="collapse" 
+                    [attr.data-bs-target]="'#collapse' + i"
+                    aria-expanded="false" 
+                    [attr.aria-controls]="'collapse' + i">
+                    {{ faq.question }}
+                  </button>
+                </h2>
+                <div 
+                  id="collapse{{ i }}" 
+                  class="accordion-collapse collapse"
+                  [class.show]="expandedFaq === i"
+                  [attr.aria-labelledby]="'heading' + i" 
+                  data-bs-parent="#faqAccordion">
+                  <div class="accordion-body">
+                    {{ faq.answer }}
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

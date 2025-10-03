@@ -1,0 +1,194 @@
+<div class="admin-dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Dashboard</h1>
+    <p class="dashboard-subtitle">Tổng quan hệ thống MiniStore</p>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-state">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Đang tải...</span>
+      </div>
+      <p class="mt-3">Đang tải dữ liệu dashboard...</p>
+    </div>
+  } @else if (stats) {
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon users">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatNumber(stats.totalUsers) }}</div>
+          <div class="stat-label">Người dùng</div>
+          <div class="stat-change positive">
+            <i class="bi bi-arrow-up"></i>
+            +{{ formatNumber(stats.usersThisMonth) }} tháng này
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon products">
+          <i class="bi bi-box-seam-fill"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatNumber(stats.totalProducts) }}</div>
+          <div class="stat-label">Sản phẩm</div>
+          <div class="stat-change">
+            <i class="bi bi-info-circle"></i>
+            Tất cả danh mục
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon categories">
+          <i class="bi bi-tags-fill"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatNumber(stats.totalCategories) }}</div>
+          <div class="stat-label">Danh mục</div>
+          <div class="stat-change">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            Đang hoạt động
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon orders">
+          <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatNumber(stats.totalOrders) }}</div>
+          <div class="stat-label">Đơn hàng</div>
+          <div class="stat-change positive">
+            <i class="bi bi-arrow-up"></i>
+            +{{ formatNumber(stats.ordersThisMonth) }} tháng này
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon blogs">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatNumber(stats.totalBlogs) }}</div>
+          <div class="stat-label">Bài viết</div>
+          <div class="stat-change">
+            <i class="bi bi-pencil-square"></i>
+            Nội dung
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon revenue">
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-number">{{ formatCurrency(stats.totalRevenue) }}</div>
+          <div class="stat-label">Doanh thu</div>
+          <div class="stat-change positive">
+            <i class="bi bi-trending-up"></i>
+            Tổng cộng
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h3 class="section-title">Thao tác nhanh</h3>
+      <div class="actions-grid">
+        <a routerLink="/admin/products" class="action-card">
+          <div class="action-icon">
+            <i class="bi bi-plus-circle-fill"></i>
+          </div>
+          <div class="action-content">
+            <h4>Thêm sản phẩm</h4>
+            <p>Tạo sản phẩm mới</p>
+          </div>
+        </a>
+
+        <a routerLink="/admin/categories" class="action-card">
+          <div class="action-icon">
+            <i class="bi bi-tag-fill"></i>
+          </div>
+          <div class="action-content">
+            <h4>Quản lý danh mục</h4>
+            <p>Thêm/sửa danh mục</p>
+          </div>
+        </a>
+
+        <a routerLink="/admin/blogs" class="action-card">
+          <div class="action-icon">
+            <i class="bi bi-journal-plus"></i>
+          </div>
+          <div class="action-content">
+            <h4>Viết bài mới</h4>
+            <p>Tạo nội dung blog</p>
+          </div>
+        </a>
+
+        <a routerLink="/admin/orders" class="action-card">
+          <div class="action-icon">
+            <i class="bi bi-list-check"></i>
+          </div>
+          <div class="action-content">
+            <h4>Xem đơn hàng</h4>
+            <p>Quản lý đơn hàng</p>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+      <h3 class="section-title">Hoạt động gần đây</h3>
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="bi bi-box-seam text-primary"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">Sản phẩm mới đã được thêm</div>
+            <div class="activity-time">2 giờ trước</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="bi bi-receipt text-success"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">Đơn hàng mới #12345</div>
+            <div class="activity-time">4 giờ trước</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="bi bi-journal-text text-info"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">Bài viết blog đã được xuất bản</div>
+            <div class="activity-time">1 ngày trước</div>
+          </div>
+        </div>
+
+        <div class="activity-item">
+          <div class="activity-icon">
+            <i class="bi bi-person-plus text-warning"></i>
+          </div>
+          <div class="activity-content">
+            <div class="activity-text">Người dùng mới đã đăng ký</div>
+            <div class="activity-time">2 ngày trước</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
