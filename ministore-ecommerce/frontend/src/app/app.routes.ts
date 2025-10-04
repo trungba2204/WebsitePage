@@ -63,10 +63,6 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent)
   },
   {
-    path: 'admin/login',
-    loadComponent: () => import('./pages/admin-login/admin-login.component').then(m => m.AdminLoginComponent)
-  },
-  {
     path: 'admin',
     loadChildren: () => import('./pages/admin/admin.routes').then(m => m.adminRoutes)
   },

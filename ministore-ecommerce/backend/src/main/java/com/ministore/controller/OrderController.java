@@ -10,6 +10,8 @@ import com.ministore.repository.ProductRepository;
 import com.ministore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -30,24 +32,62 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<List<Order>> getUserOrders() {
-        // For demo purposes, return all orders
-        // In real app, this would filter by authenticated user
-        List<Order> orders = orderRepository.findAll();
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        List<Order> orders = orderRepository.findByUserIdOrderByOrderDateDesc(currentUser.getId());
         return ResponseEntity.ok(orders);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
         Optional<Order> order = orderRepository.findById(id);
-        return order.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+        
+        // Check if order exists and belongs to current user
+        if (order.isPresent() && order.get().getUser() != null && 
+            order.get().getUser().getId().equals(currentUser.getId())) {
+            return ResponseEntity.ok(order.get());
+        }
+        
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest request) {
         try {
-            // Get current cart (for demo, get first cart)
-            var cart = cartRepository.findAll().stream().findFirst().orElse(null);
+            // Get current authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userEmail = authentication.getName();
+            
+            // Find user by email
+            Optional<User> userOpt = userRepository.findByEmail(userEmail);
+            if (userOpt.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            User currentUser = userOpt.get();
+            
+            // Get current user's cart
+            var cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
             if (cart == null || cart.getItems().isEmpty()) {
                 return ResponseEntity.badRequest().build();
             }
@@ -61,9 +101,8 @@ public class OrderController {
             order.setShippingAddress(convertToShippingAddress(request.getShippingAddress()));
             order.setPaymentMethod(request.getPaymentMethod());
             order.setNote(request.getNote());
-            // For demo purposes, set user to null (anonymous orders)
-            // In real app, this would be set from authenticated user
-            order.setUser(null);
+            // Set the current authenticated user
+            order.setUser(currentUser);
 
             // Convert cart items to order items
             for (var cartItem : cart.getItems()) {

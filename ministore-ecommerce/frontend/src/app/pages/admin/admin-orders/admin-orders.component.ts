@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AdminService } from '../../../services/admin.service';
+import { AdminOrderService, OrderResponse } from '../../../services/admin-order.service';
 import { Order, OrderStatus } from '../../../models/order.model';
 import { NotificationService } from '../../../services/notification.service';
 
@@ -14,7 +14,7 @@ import { NotificationService } from '../../../services/notification.service';
   styleUrl: './admin-orders.component.scss'
 })
 export class AdminOrdersComponent implements OnInit {
-  adminService = inject(AdminService);
+  adminOrderService = inject(AdminOrderService);
   notificationService = inject(NotificationService);
 
   // Make OrderStatus available in template
@@ -55,11 +55,11 @@ export class AdminOrdersComponent implements OnInit {
   loadOrders(): void {
     this.isLoading = true;
     
-    this.adminService.getOrders(this.currentPage, this.pageSize, this.getSortString(), this.searchQuery).subscribe({
-      next: (response: any) => {
-        this.orders = response.content || response;
-        this.totalElements = response.totalElements || response.length;
-        this.totalPages = response.totalPages || Math.ceil(response.length / this.pageSize);
+    this.adminOrderService.getAllOrders(this.currentPage, this.pageSize, this.sortBy, this.sortOrder).subscribe({
+      next: (response: OrderResponse) => {
+        this.orders = response.content;
+        this.totalElements = response.totalElements;
+        this.totalPages = response.totalPages;
         this.isLoading = false;
       },
       error: (error) => {
@@ -111,7 +111,7 @@ export class AdminOrdersComponent implements OnInit {
     this.isUpdating = true;
     this.updatingOrderId = order.id;
 
-    this.adminService.updateOrderStatus(order.id, newStatus).subscribe({
+    this.adminOrderService.updateOrderStatus(order.id, newStatus).subscribe({
       next: () => {
         this.isUpdating = false;
         this.updatingOrderId = null;
@@ -252,5 +252,29 @@ export class AdminOrdersComponent implements OnInit {
 
   canUpdateStatus(order: Order): boolean {
     return order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
+  }
+
+  deleteOrder(order: Order): void {
+    if (!confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${order.orderNumber}? Hành động này không thể hoàn tác.`)) {
+      return;
+    }
+
+    this.isUpdating = true;
+    this.updatingOrderId = order.id;
+
+    this.adminOrderService.deleteOrder(order.id).subscribe({
+      next: () => {
+        this.isUpdating = false;
+        this.updatingOrderId = null;
+        this.notificationService.showSuccess('Thành công!', 'Đơn hàng đã được xóa');
+        this.loadOrders();
+      },
+      error: (error) => {
+        this.isUpdating = false;
+        this.updatingOrderId = null;
+        console.error('Error deleting order:', error);
+        this.notificationService.showError('Lỗi!', 'Không thể xóa đơn hàng');
+      }
+    });
   }
 }

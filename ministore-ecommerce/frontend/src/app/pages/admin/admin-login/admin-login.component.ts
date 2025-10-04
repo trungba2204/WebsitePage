@@ -33,24 +33,37 @@ export class AdminLoginComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('AdminLoginComponent: Form submitted with', this.loginForm);
     if (!this.validateForm()) {
+      console.log('AdminLoginComponent: Form validation failed');
       return;
     }
 
+    console.log('AdminLoginComponent: Starting login process');
     this.isLoading = true;
 
     this.adminAuthService.login(this.loginForm).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('AdminLoginComponent: Login successful', response);
         this.isLoading = false;
         this.notificationService.showSuccess(
           'Đăng nhập thành công!',
           'Chào mừng bạn đến với Admin Panel'
         );
-        this.router.navigate(['/admin/dashboard']);
+        
+        console.log('AdminLoginComponent: Attempting redirect to /admin/dashboard');
+        this.router.navigate(['/admin/dashboard']).then(success => {
+          console.log('AdminLoginComponent: Redirect result:', success);
+          if (success) {
+            console.log('AdminLoginComponent: Redirect successful');
+          } else {
+            console.error('AdminLoginComponent: Redirect failed');
+          }
+        });
       },
       error: (error) => {
+        console.error('AdminLoginComponent: Login error', error);
         this.isLoading = false;
-        console.error('Login error:', error);
         this.notificationService.showError(
           'Đăng nhập thất bại!',
           'Email hoặc mật khẩu không chính xác'

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { AdminUser } from '../models/admin.model';
+import { User } from '../models/user.model';
 
 export interface AdminLoginRequest {
   email: string;
@@ -12,20 +13,20 @@ export interface AdminLoginRequest {
 
 export interface AdminLoginResponse {
   token: string;
-  user: AdminUser;
+  user: User;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AdminAuthService {
-  private readonly API_URL = `${environment.apiUrl}/admin/auth`;
+  private readonly API_URL = `${environment.apiUrl}/auth`;
   private http = inject(HttpClient);
   private router = inject(Router);
 
   // Signals for reactive state management
-  private adminUserSignal = signal<AdminUser | null>(null);
-  private isAuthenticatedSignal = signal<boolean>(false);
+  adminUserSignal = signal<User | null>(null);
+  isAuthenticatedSignal = signal<boolean>(false);
 
   // Public readonly signals
   adminUser = this.adminUserSignal.asReadonly();
@@ -41,9 +42,14 @@ export class AdminAuthService {
     
     if (token && user) {
       try {
-        const parsedUser = JSON.parse(user);
-        this.adminUserSignal.set(parsedUser);
-        this.isAuthenticatedSignal.set(true);
+        const parsedUser = JSON.parse(user) as User;
+        // Only set as authenticated if user has ADMIN role
+        if (parsedUser.role === 'ADMIN') {
+          this.adminUserSignal.set(parsedUser);
+          this.isAuthenticatedSignal.set(true);
+        } else {
+          this.clearAuth();
+        }
       } catch (error) {
         this.clearAuth();
       }
@@ -51,14 +57,24 @@ export class AdminAuthService {
   }
 
   login(credentials: AdminLoginRequest): Observable<AdminLoginResponse> {
+    console.log('AdminAuthService: Attempting login with', credentials);
     return this.http.post<AdminLoginResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
+          console.log('AdminAuthService: Login response received', response);
+          // Only allow ADMIN users to login through admin panel
+          if (response.user.role !== 'ADMIN') {
+            console.error('AdminAuthService: Access denied - not admin role');
+            throw new Error('Access denied. Admin role required.');
+          }
+          
+          console.log('AdminAuthService: Storing token and user data');
           localStorage.setItem('admin_token', response.token);
           localStorage.setItem('admin_user', JSON.stringify(response.user));
           
           this.adminUserSignal.set(response.user);
           this.isAuthenticatedSignal.set(true);
+          console.log('AdminAuthService: Login successful');
         })
       );
   }
@@ -82,12 +98,12 @@ export class AdminAuthService {
 
   isAdmin(): boolean {
     const user = this.adminUserSignal();
-    return user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+    return user?.role === 'ADMIN';
   }
 
   isSuperAdmin(): boolean {
-    const user = this.adminUserSignal();
-    return user?.role === 'SUPER_ADMIN';
+    // SUPER_ADMIN role doesn't exist in current system
+    return false;
   }
 
   refreshToken(): Observable<{ token: string }> {
@@ -101,8 +117,8 @@ export class AdminAuthService {
     });
   }
 
-  updateProfile(profile: Partial<AdminUser>): Observable<AdminUser> {
-    return this.http.put<AdminUser>(`${this.API_URL}/profile`, profile)
+  updateProfile(profile: Partial<User>): Observable<User> {
+    return this.http.put<User>(`${this.API_URL}/profile`, profile)
       .pipe(
         tap(updatedUser => {
           localStorage.setItem('admin_user', JSON.stringify(updatedUser));

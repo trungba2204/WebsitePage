@@ -31,7 +31,6 @@ public class AdminController {
     private final CategoryRepository categoryRepository;
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
     private final PasswordEncoder passwordEncoder;
 
     // ==================== PRODUCTS ====================
@@ -393,56 +392,6 @@ public class AdminController {
         }
     }
 
-    // ==================== ORDERS ====================
-    
-    @GetMapping("/orders")
-    public ResponseEntity<Page<Order>> getOrders(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,desc") String sort,
-            @RequestParam(required = false) String search) {
-        
-        String[] sortParams = sort.split(",");
-        String sortBy = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && "asc".equals(sortParams[1]) 
-            ? Sort.Direction.ASC : Sort.Direction.DESC;
-        
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        
-        Page<Order> orders;
-        if (search != null && !search.trim().isEmpty()) {
-            orders = orderRepository.findByOrderNumberContainingIgnoreCase(search.trim(), pageable);
-        } else {
-            orders = orderRepository.findAll(pageable);
-        }
-        
-        return ResponseEntity.ok(orders);
-    }
-
-    @GetMapping("/orders/{id}")
-    public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
-        return orderRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/orders/{id}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @RequestParam String status) {
-        try {
-            Optional<Order> existingOrder = orderRepository.findById(id);
-            if (existingOrder.isEmpty()) {
-                return ResponseEntity.notFound().build();
-            }
-
-            Order order = existingOrder.get();
-            order.setStatus(Order.OrderStatus.valueOf(status));
-
-            Order savedOrder = orderRepository.save(order);
-            return ResponseEntity.ok(savedOrder);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
 
     // ==================== DASHBOARD STATS ====================
     
@@ -452,30 +401,20 @@ public class AdminController {
             long totalUsers = userRepository.count();
             long totalProducts = productRepository.count();
             long totalCategories = categoryRepository.count();
-            long totalOrders = orderRepository.count();
             long totalBlogs = blogRepository.count();
             
-            // Calculate total revenue
-            BigDecimal totalRevenue = orderRepository.findAll().stream()
-                .filter(order -> order.getStatus() == Order.OrderStatus.DELIVERED)
-                .map(Order::getTotalAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-            
-            // Orders this month
-            LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-            long ordersThisMonth = orderRepository.countByOrderDateAfter(startOfMonth);
-            
             // Users this month
+            LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
             long usersThisMonth = userRepository.countByCreatedAtAfter(startOfMonth);
 
             AdminDashboardStats stats = new AdminDashboardStats();
             stats.setTotalUsers(totalUsers);
             stats.setTotalProducts(totalProducts);
             stats.setTotalCategories(totalCategories);
-            stats.setTotalOrders(totalOrders);
+            stats.setTotalOrders(0); // Will be handled by AdminOrderController
             stats.setTotalBlogs(totalBlogs);
-            stats.setTotalRevenue(totalRevenue);
-            stats.setOrdersThisMonth(ordersThisMonth);
+            stats.setTotalRevenue(BigDecimal.ZERO); // Will be handled by AdminOrderController
+            stats.setOrdersThisMonth(0); // Will be handled by AdminOrderController
             stats.setUsersThisMonth(usersThisMonth);
 
             return ResponseEntity.ok(stats);

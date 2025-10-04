@@ -3,11 +3,17 @@ package com.ministore.controller;
 import com.ministore.entity.Cart;
 import com.ministore.entity.CartItem;
 import com.ministore.entity.Product;
+import com.ministore.entity.User;
 import com.ministore.repository.CartRepository;
 import com.ministore.repository.ProductRepository;
+import com.ministore.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 import java.util.Optional;
 
@@ -18,17 +24,29 @@ public class CartController {
 
     private final CartRepository cartRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<Cart> getCart() {
-        // For demo purposes, create a default cart if none exists
-        Cart cart = cartRepository.findAll().stream().findFirst().orElse(null);
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get or create cart for current user
+        Cart cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
         
         if (cart == null) {
-            // Create a new cart for demo
+            // Create a new cart for current user
             cart = new Cart();
-            cart.setId(1L);
-            cart.setUser(null); // Anonymous cart
+            cart.setUser(currentUser);
             cart = cartRepository.save(cart);
         }
         
@@ -37,12 +55,23 @@ public class CartController {
 
     @PostMapping("/items")
     public ResponseEntity<Cart> addToCart(@RequestBody AddToCartRequest request) {
-        // Get or create cart
-        Cart cart = cartRepository.findAll().stream().findFirst().orElse(null);
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get or create cart for current user
+        Cart cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
         if (cart == null) {
             cart = new Cart();
-            cart.setId(1L);
-            cart.setUser(null); // Anonymous cart
+            cart.setUser(currentUser);
             cart = cartRepository.save(cart);
         }
 
@@ -78,7 +107,20 @@ public class CartController {
 
     @PutMapping("/items/{itemId}")
     public ResponseEntity<Cart> updateCartItem(@PathVariable Long itemId, @RequestBody UpdateCartItemRequest request) {
-        Cart cart = cartRepository.findAll().stream().findFirst().orElse(null);
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get current user's cart
+        Cart cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
         if (cart == null) {
             return ResponseEntity.notFound().build();
         }
@@ -100,7 +142,20 @@ public class CartController {
 
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<Cart> removeCartItem(@PathVariable Long itemId) {
-        Cart cart = cartRepository.findAll().stream().findFirst().orElse(null);
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get current user's cart
+        Cart cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
         if (cart == null) {
             return ResponseEntity.notFound().build();
         }
@@ -113,7 +168,20 @@ public class CartController {
 
     @DeleteMapping
     public ResponseEntity<Void> clearCart() {
-        Cart cart = cartRepository.findAll().stream().findFirst().orElse(null);
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userEmail = authentication.getName();
+        
+        // Find user by email
+        Optional<User> userOpt = userRepository.findByEmail(userEmail);
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        User currentUser = userOpt.get();
+        
+        // Get current user's cart
+        Cart cart = cartRepository.findByUserId(currentUser.getId()).orElse(null);
         if (cart != null) {
             cart.getItems().clear();
             cartRepository.save(cart);
