@@ -37,6 +37,12 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     
     List<Product> findTop8ByRatingGreaterThanOrderByRatingDesc(Double rating);
     
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId")
+    Long countByCategoryId(@Param("categoryId") Long categoryId);
+    
+    @Query("SELECT p.category.id, COUNT(p) FROM Product p GROUP BY p.category.id")
+    List<Object[]> getProductCountsByCategory();
+    
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }
 

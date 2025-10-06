@@ -207,24 +207,31 @@ export class AdminLayoutComponent implements OnInit {
       next: (response: any) => {
         console.log('✅ Admin avatar upload success:', response);
         
-        this.isUploadingAvatar = false;
-        this.closeAvatarModal();
-        
-        // Update admin avatar in auth service
-        const currentUser = this.adminAuthService.adminUser();
-        
-        if (currentUser) {
-          const updatedUser = { ...currentUser, avatar: response.url };
-          this.adminAuthService.updateAdminAvatar(updatedUser);
-          
-          // Update timestamp to force new URL generation
-          this.avatarTimestamp.set(Date.now());
-          
-          this.notificationService.showSuccess(
-            'Thành công!',
-            'Ảnh đại diện admin đã được cập nhật thành công'
-          );
-        }
+        // Update admin avatar in database via AdminService endpoint
+        this.adminService.updateUserAvatar(response.url).subscribe({
+          next: (updatedUser) => {
+            console.log('✅ Admin avatar updated in database:', updatedUser);
+            
+            this.isUploadingAvatar = false;
+            this.closeAvatarModal();
+            
+            // Update admin avatar in auth service
+            this.adminAuthService.updateAdminAvatar(updatedUser);
+            
+            // Update timestamp to force new URL generation
+            this.avatarTimestamp.set(Date.now());
+            
+            this.notificationService.showSuccess(
+              'Thành công!',
+              'Ảnh đại diện admin đã được cập nhật thành công'
+            );
+          },
+          error: (dbError) => {
+            this.isUploadingAvatar = false;
+            console.error('❌ Admin avatar database update error:', dbError);
+            this.notificationService.showError('Lỗi!', 'Không thể lưu ảnh đại diện vào database. Vui lòng thử lại.');
+          }
+        });
       },
       error: (error) => {
         this.isUploadingAvatar = false;

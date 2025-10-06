@@ -3,6 +3,8 @@ package com.ministore.controller;
 import com.ministore.entity.Blog;
 import com.ministore.entity.BlogComment;
 import com.ministore.service.BlogService;
+import com.ministore.dto.CategoryCountDTO;
+import com.ministore.dto.BlogCategoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -42,8 +44,17 @@ public class BlogController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<String>> getCategories() {
-        return ResponseEntity.ok(blogService.getCategories());
+    public ResponseEntity<List<BlogCategoryDTO>> getCategories() {
+        List<BlogCategoryDTO> categories = blogService.getCategories();
+        System.out.println("🔍 BlogController getCategories - DTO categories: " + categories);
+        return ResponseEntity.ok(categories);
+    }
+
+    @GetMapping("/categories/count")
+    public ResponseEntity<List<CategoryCountDTO>> getCategoryCounts() {
+        List<CategoryCountDTO> counts = blogService.getCategoryCounts();
+        System.out.println("🔍 BlogController getCategoryCounts - DTO data: " + counts);
+        return ResponseEntity.ok(counts);
     }
 
     @GetMapping("/recent")

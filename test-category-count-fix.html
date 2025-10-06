@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Category Product Count Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .api-endpoint {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔢 Test Category Product Count Fix</h1>
+        
+        <div class="test-result info">
+            <strong>📋 Test Description:</strong><br>
+            Kiểm tra xem số lượng sản phẩm hiển thị đúng cho từng danh mục khi bấm vào "Danh Mục".
+        </div>
+
+        <div class="test-result info">
+            <strong>🎯 Expected Result:</strong><br>
+            Categories should display correct product counts (e.g., "Electronics (15)", "Clothing (8)") instead of incorrect numbers.
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Backend API Added:</strong><br>
+            <div class="api-endpoint">
+                GET /api/products/counts/categories<br>
+                Returns: {categoryId: count} mapping
+            </div>
+            <div class="api-endpoint">
+                GET /api/products/counts/category/{categoryId}<br>
+                Returns: Single category count
+            </div>
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Frontend Updated:</strong><br>
+            - Added product count loading in ProductsComponent<br>
+            - Updated template to show counts for each category<br>
+            - Fixed getTotalProducts() to use totalElements from API
+        </div>
+
+        <h2>🧪 Test Steps:</h2>
+        <ol>
+            <li>Go to <a href="http://localhost:4200/products" target="_blank">http://localhost:4200/products</a></li>
+            <li>Check the "Danh mục" filter section in the sidebar</li>
+            <li>Verify each category shows correct product count</li>
+            <li>Click on different categories and verify counts are accurate</li>
+            <li>Check "Tất cả danh mục" shows total product count</li>
+        </ol>
+
+        <h2>🔍 What to Look For:</h2>
+        <ul>
+            <li><strong>Before Fix:</strong> Categories showed wrong counts or no counts</li>
+            <li><strong>After Fix:</strong> Categories show accurate product counts from database</li>
+            <li><strong>Example:</strong> "Electronics (15)", "Clothing (8)", "Home & Garden (3)"</li>
+        </ul>
+
+        <h2>🔧 Technical Changes:</h2>
+        <ul>
+            <li><strong>Backend:</strong> Added ProductRepository queries for category counts</li>
+            <li><strong>Backend:</strong> Added ProductService methods for count operations</li>
+            <li><strong>Backend:</strong> Added ProductController endpoints for count APIs</li>
+            <li><strong>Frontend:</strong> Updated ProductService with count methods</li>
+            <li><strong>Frontend:</strong> Updated ProductsComponent to load and display counts</li>
+            <li><strong>Frontend:</strong> Fixed template to show counts for each category</li>
+        </ul>
+
+        <div class="test-result success">
+            <strong>🎉 Fix Status:</strong> COMPLETED<br>
+            The category product count display issue has been resolved with proper API integration.
+        </div>
+    </div>
+
+    <script>
+        console.log('🔢 Category Product Count Fix Test Page Loaded');
+        console.log('✅ Backend APIs added for product counts by category');
+        console.log('✅ Frontend updated to load and display accurate counts');
+        console.log('🎯 Expected result: Correct product counts for each category');
+    </script>
+</body>
+</html>

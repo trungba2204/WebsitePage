@@ -8,7 +8,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +53,21 @@ public class ProductService {
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+    }
+
+    public Long getProductCountByCategory(Long categoryId) {
+        return productRepository.countByCategoryId(categoryId);
+    }
+
+    public Map<Long, Long> getProductCountsByCategory() {
+        List<Object[]> results = productRepository.getProductCountsByCategory();
+        Map<Long, Long> counts = new HashMap<>();
+        for (Object[] result : results) {
+            Long categoryId = ((Number) result[0]).longValue();
+            Long count = ((Number) result[1]).longValue();
+            counts.put(categoryId, count);
+        }
+        return counts;
     }
 }
 

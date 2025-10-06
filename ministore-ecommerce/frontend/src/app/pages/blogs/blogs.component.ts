@@ -17,6 +17,7 @@ export class BlogsComponent implements OnInit {
   
   blogs: Blog[] = [];
   categories: BlogCategory[] = [];
+  categoryCounts: {category: string, count: number}[] = [];
   recentBlogs: Blog[] = [];
   popularBlogs: Blog[] = [];
   totalBlogs = 0;
@@ -37,13 +38,17 @@ export class BlogsComponent implements OnInit {
   selectedCategory = '';
 
   ngOnInit(): void {
+    console.log('🔍 BlogsComponent ngOnInit - Starting initialization');
     this.loadBlogs();
     this.loadCategories();
+    this.loadCategoryCounts();
     this.loadRecentBlogs();
     this.loadPopularBlogs();
   }
 
   loadBlogs(): void {
+    console.log('🔍 BlogsComponent loadBlogs - Loading blogs with filter:', this.filter);
+    console.log('🔍 BlogsComponent loadBlogs - Filter category value:', this.filter.category);
     this.isLoading = true;
     
     this.blogService.getBlogs(this.filter).subscribe({
@@ -53,6 +58,8 @@ export class BlogsComponent implements OnInit {
         this.currentPage = response.number;
         this.totalBlogs = response.totalElements;
         this.isLoading = false;
+        console.log('✅ BlogsComponent loadBlogs - Blogs loaded:', this.blogs.length, 'blogs');
+        console.log('✅ BlogsComponent loadBlogs - First blog category:', this.blogs[0]?.category);
       },
       error: (error) => {
         console.error('Error loading blogs:', error);
@@ -62,11 +69,28 @@ export class BlogsComponent implements OnInit {
   }
 
   loadCategories(): void {
+    console.log('🔍 BlogsComponent loadCategories - Starting to load categories');
     this.blogService.getBlogCategories().subscribe({
       next: (categories) => {
+        console.log('✅ BlogsComponent loadCategories - Categories loaded:', categories);
         this.categories = categories;
       },
-      error: (error) => console.error('Error loading categories:', error)
+      error: (error) => {
+        console.error('❌ BlogsComponent loadCategories - Error loading categories:', error);
+      }
+    });
+  }
+
+  loadCategoryCounts(): void {
+    this.blogService.getCategoryCounts().subscribe({
+      next: (counts) => {
+        console.log('✅ BlogsComponent - Category counts loaded:', counts);
+        this.categoryCounts = counts;
+      },
+      error: (error) => {
+        console.error('❌ BlogsComponent - Error loading category counts:', error);
+        this.categoryCounts = [];
+      }
     });
   }
 
@@ -88,9 +112,20 @@ export class BlogsComponent implements OnInit {
     });
   }
 
-  onCategoryChange(category: string): void {
-    this.selectedCategory = category;
-    this.filter.category = category;
+  onCategoryChange(categorySlug: string): void {
+    console.log('🔍 BlogsComponent onCategoryChange - Category slug:', categorySlug);
+    
+    // Find the category name from the slug
+    const category = this.categories.find(cat => cat.slug === categorySlug);
+    if (!category) {
+      console.log('❌ BlogsComponent onCategoryChange - Category not found for slug:', categorySlug);
+      return;
+    }
+    
+    console.log('✅ BlogsComponent onCategoryChange - Found category:', category.name, 'for slug:', categorySlug);
+    
+    this.selectedCategory = categorySlug;
+    this.filter.category = category.name; // Use category name, not slug
     this.filter.page = 0;
     this.currentPage = 0;
     this.loadBlogs();
@@ -104,6 +139,7 @@ export class BlogsComponent implements OnInit {
   }
 
   clearFilters(): void {
+    console.log('🔍 BlogsComponent clearFilters - Clearing all filters');
     this.searchQuery = '';
     this.selectedCategory = '';
     this.filter = {
@@ -155,8 +191,21 @@ export class BlogsComponent implements OnInit {
   }
 
   getCategoryCount(categorySlug: string): number {
-    // This would need to be implemented based on your API
-    // For now, return a mock number
-    return Math.floor(Math.random() * 10) + 1;
+    console.log('🔍 BlogsComponent getCategoryCount - Looking for slug:', categorySlug);
+    console.log('🔍 BlogsComponent getCategoryCount - Available counts:', this.categoryCounts);
+    console.log('🔍 BlogsComponent getCategoryCount - Available categories:', this.categories);
+    
+    // Find the category name from the slug
+    const category = this.categories.find(cat => cat.slug === categorySlug);
+    if (!category) {
+      console.log('❌ BlogsComponent getCategoryCount - Category not found for slug:', categorySlug);
+      return 0;
+    }
+    
+    const categoryCount = this.categoryCounts.find(item => item.category === category.name);
+    const count = categoryCount ? categoryCount.count : 0;
+    
+    console.log('✅ BlogsComponent getCategoryCount - Found count:', count, 'for category:', category.name, 'slug:', categorySlug);
+    return count;
   }
 }

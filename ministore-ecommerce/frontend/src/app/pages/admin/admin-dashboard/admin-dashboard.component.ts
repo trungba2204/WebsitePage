@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ProductService } from '../../../services/product.service';
 import { OrderService } from '../../../services/order.service';
 import { BlogService } from '../../../services/blog.service';
+import { AdminService } from '../../../services/admin.service';
 import { Product } from '../../../models/product.model';
 import { Order } from '../../../models/order.model';
 import { Blog } from '../../../models/blog.model';
@@ -19,6 +20,7 @@ export class AdminDashboardComponent implements OnInit {
   productService = inject(ProductService);
   orderService = inject(OrderService);
   blogService = inject(BlogService);
+  adminService = inject(AdminService);
 
   // Real data for dashboard stats
   stats = {
@@ -69,16 +71,24 @@ export class AdminDashboardComponent implements OnInit {
 
   private loadOrders(): Promise<void> {
     return new Promise((resolve) => {
-      this.orderService.getUserOrders().subscribe({
-        next: (orders: any) => {
+      console.log('🔍 AdminDashboard loadOrders - Loading all orders via AdminService');
+      this.adminService.getOrders().subscribe({
+        next: (response: any) => {
+          console.log('✅ AdminDashboard loadOrders - Orders loaded:', response);
+          const orders = response.content || response;
           this.stats.totalOrders = orders.length || 0;
           
           this.stats.totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.totalAmount || 0), 0);
           this.recentOrders = orders.slice(0, 5); // Get 5 most recent orders
+          console.log('✅ AdminDashboard loadOrders - Stats updated:', {
+            totalOrders: this.stats.totalOrders,
+            totalRevenue: this.stats.totalRevenue,
+            recentOrders: this.recentOrders.length
+          });
           resolve();
         },
         error: (error: any) => {
-          console.error('Error loading orders:', error);
+          console.error('❌ AdminDashboard loadOrders - Error loading orders:', error);
           resolve();
         }
       });
@@ -87,9 +97,21 @@ export class AdminDashboardComponent implements OnInit {
 
   private loadUsers(): Promise<void> {
     return new Promise((resolve) => {
-      // For now, we'll set a default value since we don't have a getUsers API yet
-      this.stats.totalUsers = 0;
-      resolve();
+      console.log('🔍 AdminDashboard loadUsers - Loading all users via AdminService');
+      this.adminService.getUsers().subscribe({
+        next: (response: any) => {
+          console.log('✅ AdminDashboard loadUsers - Users loaded:', response);
+          const users = response.content || response;
+          this.stats.totalUsers = users.length || 0;
+          console.log('✅ AdminDashboard loadUsers - Total users:', this.stats.totalUsers);
+          resolve();
+        },
+        error: (error: any) => {
+          console.error('❌ AdminDashboard loadUsers - Error loading users:', error);
+          this.stats.totalUsers = 0;
+          resolve();
+        }
+      });
     });
   }
 

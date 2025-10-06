@@ -4,6 +4,8 @@ import com.ministore.entity.Blog;
 import com.ministore.entity.BlogComment;
 import com.ministore.repository.BlogRepository;
 import com.ministore.repository.BlogCommentRepository;
+import com.ministore.dto.CategoryCountDTO;
+import com.ministore.dto.BlogCategoryDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +55,30 @@ public class BlogService {
                 .orElseThrow(() -> new RuntimeException("Blog not found"));
     }
 
-    public List<String> getCategories() {
-        return blogRepository.findDistinctCategories();
+    public List<BlogCategoryDTO> getCategories() {
+        List<String> categoryNames = blogRepository.findDistinctCategories();
+        System.out.println("🔍 BlogService getCategories - Raw categories: " + categoryNames);
+        
+        return categoryNames.stream()
+                .map(categoryName -> new BlogCategoryDTO(
+                    (long) categoryName.hashCode(), // Generate ID from hash
+                    categoryName,                   // name
+                    "",                             // description (empty for now)
+                    categoryName.toLowerCase().replace(" ", "-") // slug
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<CategoryCountDTO> getCategoryCounts() {
+        List<Object[]> rawCounts = blogRepository.getCategoryCounts();
+        System.out.println("🔍 BlogService getCategoryCounts - Raw counts: " + rawCounts);
+        
+        return rawCounts.stream()
+                .map(row -> new CategoryCountDTO(
+                    (String) row[0],  // category
+                    (Long) row[1]     // count
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<Blog> getRecentBlogs(int limit) {

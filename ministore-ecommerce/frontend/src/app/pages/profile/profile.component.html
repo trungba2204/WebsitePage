@@ -14,14 +14,34 @@
             <div class="profile-avatar">
               <div class="avatar-circle">
                 @if (user.avatar) {
-                  <img [src]="user.avatar" [alt]="user.firstName" class="avatar-image">
+                  <img 
+                    [src]="user.avatar" 
+                    [alt]="user.firstName" 
+                    class="avatar-image"
+                    appImageFallback
+                    [fallbackImage]="getFallbackImage()">
                 } @else {
                   <i class="bi bi-person-circle"></i>
                 }
               </div>
-              <button class="btn btn-outline-primary btn-sm mt-2">
-                <i class="bi bi-camera me-1"></i>
-                Đổi ảnh
+              <input 
+                type="file" 
+                id="avatar-upload" 
+                accept="image/*" 
+                (change)="onAvatarChange($event)" 
+                style="display: none;">
+              <button 
+                type="button" 
+                class="btn btn-outline-primary btn-sm mt-2"
+                (click)="triggerFileInput()"
+                [disabled]="isUploadingAvatar">
+                @if (isUploadingAvatar) {
+                  <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  Đang tải...
+                } @else {
+                  <i class="bi bi-camera me-1"></i>
+                  Đổi ảnh
+                }
               </button>
             </div>
             

@@ -37,6 +37,9 @@ public interface BlogRepository extends JpaRepository<Blog, Long> {
     @Query("SELECT DISTINCT b.category FROM Blog b WHERE b.published = true ORDER BY b.category")
     List<String> findDistinctCategories();
 
+    @Query("SELECT b.category, COUNT(b) FROM Blog b WHERE b.published = true GROUP BY b.category ORDER BY COUNT(b) DESC")
+    List<Object[]> getCategoryCounts();
+
     @Query("UPDATE Blog b SET b.views = b.views + 1 WHERE b.id = :id")
     void incrementViews(@Param("id") Long id);
 

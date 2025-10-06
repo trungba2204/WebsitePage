@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/products")
@@ -54,6 +55,16 @@ public class ProductController {
     @GetMapping("/featured")
     public ResponseEntity<List<Product>> getFeaturedProducts(@RequestParam(defaultValue = "8") int limit) {
         return ResponseEntity.ok(productService.getFeaturedProducts(limit));
+    }
+
+    @GetMapping("/counts/category/{categoryId}")
+    public ResponseEntity<Long> getProductCountByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(productService.getProductCountByCategory(categoryId));
+    }
+
+    @GetMapping("/counts/categories")
+    public ResponseEntity<Map<Long, Long>> getProductCountsByCategory() {
+        return ResponseEntity.ok(productService.getProductCountsByCategory());
     }
 }
 

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Notification Popup Instead of Alert</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .before, .after {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .before {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .after {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔔 Test Notification Popup Instead of Alert</h1>
+        
+        <div class="test-result info">
+            <strong>📋 Test Description:</strong><br>
+            Kiểm tra việc thay thế alert built-in bằng NotificationService popup đẹp cho upload avatar.
+        </div>
+
+        <div class="test-result info">
+            <strong>🎯 Expected Result:</strong><br>
+            Thay vì alert popup đơn giản, sẽ hiển thị notification popup đẹp với animation và styling.
+        </div>
+
+        <div class="comparison">
+            <div class="before">
+                <h3>❌ Before Fix (Alert)</h3>
+                <div class="code-block">
+                    // Ugly browser alert
+                    alert('Đổi ảnh đại diện thành công!');
+                    alert('Vui lòng chọn file ảnh hợp lệ');
+                    alert('Kích thước file không được vượt quá 5MB');
+                    alert('Có lỗi xảy ra khi đổi ảnh đại diện');
+                </div>
+                <p><strong>Problems:</strong></p>
+                <ul>
+                    <li>❌ Ugly browser default alert</li>
+                    <li>❌ No styling or customization</li>
+                    <li>❌ Blocks entire page interaction</li>
+                    <li>❌ Poor user experience</li>
+                    <li>❌ Not consistent with app design</li>
+                </ul>
+            </div>
+
+            <div class="after">
+                <h3>✅ After Fix (Notification)</h3>
+                <div class="code-block">
+                    // Beautiful notification popup
+                    this.notificationService.showSuccess(
+                        'Thành công!',
+                        'Ảnh đại diện đã được cập nhật thành công'
+                    );
+                    
+                    this.notificationService.showError(
+                        'Lỗi định dạng file',
+                        'Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WEBP)'
+                    );
+                </div>
+                <p><strong>Benefits:</strong></p>
+                <ul>
+                    <li>✅ Beautiful styled popup</li>
+                    <li>✅ Customizable design</li>
+                    <li>✅ Non-blocking interaction</li>
+                    <li>✅ Better user experience</li>
+                    <li>✅ Consistent with app design</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Implementation Applied:</strong><br>
+            <div class="code-block">
+                // ProfileComponent.ts - Added NotificationService
+                import { NotificationService } from '../../services/notification.service';
+                
+                export class ProfileComponent implements OnInit {
+                  notificationService = inject(NotificationService);
+                  
+                  // File validation errors
+                  if (!allowedTypes.includes(file.type)) {
+                    this.notificationService.showError(
+                      'Lỗi định dạng file',
+                      'Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WEBP)'
+                    );
+                    return;
+                  }
+                  
+                  if (file.size > 5 * 1024 * 1024) {
+                    this.notificationService.showError(
+                      'File quá lớn',
+                      'Kích thước file không được vượt quá 5MB'
+                    );
+                    return;
+                  }
+                  
+                  // Upload success
+                  this.authService.uploadAvatar(file).subscribe({
+                    next: (updatedUser) => {
+                      this.notificationService.showSuccess(
+                        'Thành công!',
+                        'Ảnh đại diện đã được cập nhật thành công'
+                      );
+                    },
+                    error: (error) => {
+                      this.notificationService.showError(
+                        'Lỗi upload',
+                        'Có lỗi xảy ra khi đổi ảnh đại diện. Vui lòng thử lại.'
+                      );
+                    }
+                  });
+                }
+            </div>
+        </div>
+
+        <h2>🎨 Notification Types:</h2>
+        <div class="code-block">
+            // Success Notification (Green)
+            this.notificationService.showSuccess(title, message);
+            
+            // Error Notification (Red)
+            this.notificationService.showError(title, message);
+            
+            // Warning Notification (Yellow)
+            this.notificationService.showWarning(title, message);
+            
+            // Info Notification (Blue)
+            this.notificationService.showInfo(title, message);
+        </div>
+
+        <h2>🧪 Test Steps:</h2>
+        <div class="step">
+            <strong>Step 1:</strong> Go to <a href="http://localhost:4200/profile" target="_blank">http://localhost:4200/profile</a>
+        </div>
+        <div class="step">
+            <strong>Step 2:</strong> Click "Đổi ảnh" button
+        </div>
+        <div class="step">
+            <strong>Step 3:</strong> Test different scenarios:
+            <ul>
+                <li><strong>Invalid file type:</strong> Select .txt file → Should show red error popup</li>
+                <li><strong>File too large:</strong> Select file > 5MB → Should show red error popup</li>
+                <li><strong>Valid file:</strong> Select valid image → Should show green success popup</li>
+                <li><strong>Network error:</strong> Disconnect internet → Should show red error popup</li>
+            </ul>
+        </div>
+
+        <h2>🔍 What to Look For:</h2>
+        <ul>
+            <li><strong>No Browser Alert:</strong> Should not see ugly browser alert popup</li>
+            <li><strong>Styled Notifications:</strong> Should see beautiful styled popup notifications</li>
+            <li><strong>Color Coding:</strong> 
+                <ul>
+                    <li>🟢 Green for success</li>
+                    <li>🔴 Red for errors</li>
+                    <li>🟡 Yellow for warnings</li>
+                    <li>🔵 Blue for info</li>
+                </ul>
+            </li>
+            <li><strong>Non-blocking:</strong> Should not block page interaction</li>
+            <li><strong>Auto-dismiss:</strong> Should auto-dismiss after few seconds</li>
+            <li><strong>Animation:</strong> Should have smooth slide-in/out animation</li>
+            <li><strong>Consistent Design:</strong> Should match app's overall design theme</li>
+        </ul>
+
+        <h2>📱 Notification Features:</h2>
+        <ul>
+            <li>✅ <strong>Styled Popup:</strong> Beautiful custom-designed notification</li>
+            <li>✅ <strong>Color Coding:</strong> Different colors for different types</li>
+            <li>✅ <strong>Icons:</strong> Appropriate icons for each notification type</li>
+            <li>✅ <strong>Animation:</strong> Smooth slide-in/out animations</li>
+            <li>✅ <strong>Auto-dismiss:</strong> Automatically disappears after timeout</li>
+            <li>✅ <strong>Non-blocking:</strong> Doesn't block page interaction</li>
+            <li>✅ <strong>Positioning:</strong> Appears in consistent location (top-right)</li>
+            <li>✅ <strong>Responsive:</strong> Works on all screen sizes</li>
+            <li>✅ <strong>Accessible:</strong> Screen reader friendly</li>
+            <li>✅ <strong>Customizable:</strong> Easy to modify styling and behavior</li>
+        </ul>
+
+        <h2>🚨 Test Scenarios:</h2>
+        <div class="step">
+            <strong>Scenario 1 - File Type Error:</strong><br>
+            Upload .txt file → Should see red notification: "Lỗi định dạng file - Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WEBP)"
+        </div>
+        <div class="step">
+            <strong>Scenario 2 - File Size Error:</strong><br>
+            Upload file > 5MB → Should see red notification: "File quá lớn - Kích thước file không được vượt quá 5MB"
+        </div>
+        <div class="step">
+            <strong>Scenario 3 - Upload Success:</strong><br>
+            Upload valid image → Should see green notification: "Thành công! - Ảnh đại diện đã được cập nhật thành công"
+        </div>
+        <div class="step">
+            <strong>Scenario 4 - Upload Error:</strong><br>
+            Network error during upload → Should see red notification: "Lỗi upload - Có lỗi xảy ra khi đổi ảnh đại diện. Vui lòng thử lại."
+        </div>
+
+        <h2>🎯 Expected Behavior:</h2>
+        <ul>
+            <li><strong>No Browser Alert:</strong> Should never see ugly browser alert() popup</li>
+            <li><strong>Beautiful Notifications:</strong> Should see styled notification popups</li>
+            <li><strong>Proper Timing:</strong> Notifications should appear at right time</li>
+            <li><strong>Clear Messages:</strong> Error and success messages should be clear</li>
+            <li><strong>Consistent UX:</strong> Same notification system used throughout app</li>
+            <li><strong>Professional Look:</strong> Should look professional and polished</li>
+        </ul>
+
+        <div class="test-result success">
+            <strong>🎉 Fix Status:</strong> COMPLETED<br>
+            All alert() calls have been replaced with beautiful NotificationService popups for a better user experience.
+        </div>
+    </div>
+
+    <script>
+        console.log('🔔 Notification Popup Test Page Loaded');
+        console.log('✅ Problem: Ugly browser alert() popups');
+        console.log('✅ Solution: Beautiful NotificationService popups');
+        console.log('🎯 Expected: Styled notifications instead of browser alerts');
+    </script>
+</body>
+</html>

@@ -55,6 +55,10 @@ export class BlogService {
     return this.http.get<BlogCategory[]>(`${this.API_URL}/categories`);
   }
 
+  getCategoryCounts(): Observable<{category: string, count: number}[]> {
+    return this.http.get<{category: string, count: number}[]>(`${this.API_URL}/categories/count`);
+  }
+
   getRecentBlogs(limit: number = 5): Observable<Blog[]> {
     return this.http.get<Blog[]>(`${this.API_URL}/recent`, {
       params: { limit: limit.toString() }

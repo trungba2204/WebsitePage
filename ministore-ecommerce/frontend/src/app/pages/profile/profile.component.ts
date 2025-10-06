@@ -4,24 +4,28 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { OrderService } from '../../services/order.service';
+import { NotificationService } from '../../services/notification.service';
 import { User } from '../../models/user.model';
 import { Order } from '../../models/order.model';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImageFallbackDirective],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss'
 })
 export class ProfileComponent implements OnInit {
   authService = inject(AuthService);
   orderService = inject(OrderService);
+  notificationService = inject(NotificationService);
   
   user: User | null = null;
   recentOrders: Order[] = [];
   isLoading = false;
   isEditing = false;
+  isUploadingAvatar = false;
   
   // Form data for editing
   editForm = {
@@ -131,6 +135,82 @@ export class ProfileComponent implements OnInit {
   getTotalSpent(): string {
     const total = this.recentOrders.reduce((sum, order) => sum + order.totalAmount, 0);
     return this.formatPrice(total);
+  }
+
+  onAvatarChange(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        this.notificationService.showError(
+          'Lỗi định dạng file',
+          'Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WEBP)'
+        );
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError(
+          'File quá lớn',
+          'Kích thước file không được vượt quá 5MB'
+        );
+        return;
+      }
+
+      this.uploadAvatar(file);
+    }
+  }
+
+  private uploadAvatar(file: File): void {
+    this.isUploadingAvatar = true;
+    
+    this.authService.uploadAvatar(file).subscribe({
+      next: (updatedUser) => {
+        console.log('✅ Avatar uploaded successfully:', updatedUser);
+        this.user = updatedUser;
+        this.isUploadingAvatar = false;
+        
+        // Show success notification
+        this.notificationService.showSuccess(
+          'Thành công!',
+          'Ảnh đại diện đã được cập nhật thành công'
+        );
+      },
+      error: (error) => {
+        console.error('❌ Error uploading avatar:', error);
+        this.isUploadingAvatar = false;
+        
+        // Show error notification
+        this.notificationService.showError(
+          'Lỗi upload',
+          'Có lỗi xảy ra khi đổi ảnh đại diện. Vui lòng thử lại.'
+        );
+      }
+    });
+  }
+
+  getFallbackImage(): string {
+    if (this.user) {
+      const initials = (this.user.firstName?.charAt(0) || '') + (this.user.lastName?.charAt(0) || '');
+      return `data:image/svg+xml;base64,${btoa(`
+        <svg width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="60" fill="#007bff"/>
+          <text x="60" y="70" text-anchor="middle" fill="white" font-family="Arial" font-size="24" font-weight="bold">${initials}</text>
+        </svg>
+      `)}`;
+    }
+    return '';
+  }
+
+  triggerFileInput(): void {
+    const fileInput = document.getElementById('avatar-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
   }
 }
 

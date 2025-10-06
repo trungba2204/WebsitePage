@@ -108,18 +108,42 @@ export class AuthService {
   }
 
   updateCurrentUser(updatedUser: User): void {
-    console.log('🔍 AuthService updateCurrentUser - Updating user data:', updatedUser);
-    console.log('🔍 AuthService updateCurrentUser - New avatar:', updatedUser.avatar);
-    this.currentUser.set(updatedUser);
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    console.log('✅ AuthService updateCurrentUser - User data updated successfully');
+    console.log('🔍 AuthService updateCurrentUser - Received updated user:', updatedUser);
+    
+    // Get current user data to preserve existing fields
+    const currentUser = this.currentUser();
+    console.log('🔍 AuthService updateCurrentUser - Current user:', currentUser);
+    
+    if (currentUser) {
+      // Merge updated user data with existing data to preserve fields not updated
+      const mergedUser = { ...currentUser, ...updatedUser };
+      console.log('🔍 AuthService updateCurrentUser - Merged user data:', mergedUser);
+      
+      this.currentUser.set(mergedUser);
+      localStorage.setItem('user', JSON.stringify(mergedUser));
+      console.log('✅ AuthService updateCurrentUser - User data updated while preserving existing fields');
+    } else {
+      // Fallback: use the updated user data as-is
+      console.log('⚠️ AuthService updateCurrentUser - No current user found, using updated user as-is');
+      this.currentUser.set(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
   }
 
-  updateUserAvatar(avatarUrl: string): Observable<User> {
-    console.log('🔍 AuthService updateUserAvatar - Updating avatar to:', avatarUrl);
-    return this.http.put<User>(`${environment.apiUrl}/user/avatar`, { avatar: avatarUrl }).pipe(
-      tap(updatedUser => {
-        console.log('✅ AuthService updateUserAvatar - Avatar updated successfully:', updatedUser);
+  uploadAvatar(file: File): Observable<User> {
+    console.log('🔍 AuthService uploadAvatar - Uploading file:', file.name);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = this.getToken();
+    const headers: { [key: string]: string } = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return this.http.post<User>(`${this.API_URL}/upload-avatar`, formData, { headers }).pipe(
+      tap((updatedUser: User) => {
+        console.log('✅ AuthService uploadAvatar - Avatar uploaded successfully:', updatedUser);
         this.updateCurrentUser(updatedUser);
       })
     );

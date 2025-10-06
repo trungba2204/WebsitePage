@@ -20,6 +20,7 @@ export class ProductsComponent implements OnInit {
   
   products: Product[] = [];
   categories: Category[] = [];
+  categoryCounts: {[key: number]: number} = {};
   isLoading = true;
   
   filter: ProductFilter = {
@@ -30,6 +31,8 @@ export class ProductsComponent implements OnInit {
   };
   
   totalPages = 0;
+  totalElements = 0;
+  totalProductsInDatabase = 0; // Store actual total products in database
   currentPage = 0;
   showFilters = false;
   
@@ -64,8 +67,20 @@ export class ProductsComponent implements OnInit {
     this.productService.getCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
+        this.loadCategoryCounts();
       },
       error: (error) => console.error('Error loading categories:', error)
+    });
+  }
+
+  loadCategoryCounts(): void {
+    this.productService.getProductCountsByCategory().subscribe({
+      next: (counts) => {
+        this.categoryCounts = counts;
+        // Calculate total products in database from category counts
+        this.totalProductsInDatabase = Object.values(counts).reduce((sum, count) => sum + count, 0);
+      },
+      error: (error) => console.error('Error loading category counts:', error)
     });
   }
 
@@ -76,6 +91,7 @@ export class ProductsComponent implements OnInit {
       next: (response: ProductResponse) => {
         this.products = response.content;
         this.totalPages = response.totalPages;
+        this.totalElements = response.totalElements;
         this.currentPage = response.number;
         this.isLoading = false;
       },
@@ -191,9 +207,11 @@ export class ProductsComponent implements OnInit {
   }
 
   getTotalProducts(): number {
-    // This would typically come from the API response
-    // For now, return a placeholder
-    return this.products.length;
+    return this.totalProductsInDatabase;
+  }
+
+  getCategoryProductCount(categoryId: number): number {
+    return this.categoryCounts[categoryId] || 0;
   }
 }
 

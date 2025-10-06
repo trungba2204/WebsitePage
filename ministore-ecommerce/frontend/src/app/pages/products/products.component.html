@@ -45,6 +45,7 @@
                   [checked]="filter.categoryId === category.id"
                   (change)="onCategoryChange(category.id)" />
                 <span>{{ category.name }}</span>
+                <span class="count">({{ getCategoryProductCount(category.id) }})</span>
               </label>
             }
           </div>

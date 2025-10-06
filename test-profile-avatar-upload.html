@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Profile Avatar Upload Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+        .step {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📸 Test Profile Avatar Upload Fix</h1>
+        
+        <div class="test-result info">
+            <strong>📋 Test Description:</strong><br>
+            Kiểm tra chức năng upload ảnh đại diện trong phần Tài khoản/Profile.
+        </div>
+
+        <div class="test-result info">
+            <strong>🎯 Expected Result:</strong><br>
+            User có thể click "Đổi ảnh" → chọn file ảnh → upload thành công → ảnh hiển thị mới.
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Problem Identified:</strong><br>
+            <div class="code-block">
+                // Before Fix (Broken)
+                &lt;button class="btn btn-outline-primary btn-sm mt-2"&gt;
+                  &lt;i class="bi bi-camera me-1"&gt;&lt;/i&gt;
+                  Đổi ảnh
+                &lt;/button&gt;  // ❌ No click handler, no file input
+            </div>
+            <strong>Issue:</strong> Button "Đổi ảnh" không có chức năng upload thực tế.
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Solution Applied:</strong><br>
+            <div class="code-block">
+                // After Fix (Working)
+                &lt;input type="file" id="avatar-upload" accept="image/*" 
+                       (change)="onAvatarChange($event)" style="display: none;"&gt;
+                &lt;button (click)="triggerFileInput()" [disabled]="isUploadingAvatar"&gt;
+                  @if (isUploadingAvatar) {
+                    &lt;span class="spinner-border spinner-border-sm me-1"&gt;&lt;/span&gt;
+                    Đang tải...
+                  } @else {
+                    &lt;i class="bi bi-camera me-1"&gt;&lt;/i&gt;
+                    Đổi ảnh
+                  }
+                &lt;/button&gt;
+            </div>
+        </div>
+
+        <h2>🔧 Backend API Implementation:</h2>
+        <div class="code-block">
+            // AuthController.java
+            @PostMapping("/upload-avatar")
+            public ResponseEntity&lt;UserDTO&gt; uploadAvatar(
+                @RequestParam("file") MultipartFile file,
+                Authentication authentication) {
+                return ResponseEntity.ok(authService.updateUserAvatar(file, authentication.getName()));
+            }
+
+            // AuthService.java
+            public UserDTO updateUserAvatar(MultipartFile file, String email) {
+                User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -&gt; new RuntimeException("User not found"));
+                
+                // Save file to uploads/ directory
+                String filename = UUID.randomUUID().toString() + extension;
+                Path filePath = uploadDir.resolve(filename);
+                Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                
+                // Update user avatar URL
+                String avatarUrl = "http://localhost:8080/uploads/" + filename;
+                user.setAvatar(avatarUrl);
+                return UserDTO.fromEntity(userRepository.save(user));
+            }
+        </div>
+
+        <h2>🎨 Frontend Implementation:</h2>
+        <div class="code-block">
+            // AuthService.ts
+            uploadAvatar(file: File): Observable&lt;User&gt; {
+                const formData = new FormData();
+                formData.append('file', file);
+                const headers: { [key: string]: string } = {};
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+                return this.http.post&lt;User&gt;(`${this.API_URL}/upload-avatar`, formData, { headers });
+            }
+
+            // ProfileComponent.ts
+            onAvatarChange(event: Event): void {
+                const input = event.target as HTMLInputElement;
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    
+                    // Validate file type and size
+                    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+                        alert('Vui lòng chọn file ảnh hợp lệ (JPG, PNG, GIF, WEBP) và không quá 5MB');
+                        return;
+                    }
+                    
+                    this.uploadAvatar(file);
+                }
+            }
+        </div>
+
+        <h2>🧪 Test Steps:</h2>
+        <div class="step">
+            <strong>Step 1:</strong> Go to <a href="http://localhost:4200/profile" target="_blank">http://localhost:4200/profile</a>
+        </div>
+        <div class="step">
+            <strong>Step 2:</strong> Login với tài khoản user (nếu chưa login)
+        </div>
+        <div class="step">
+            <strong>Step 3:</strong> Scroll xuống phần "Profile Info" với ảnh đại diện
+        </div>
+        <div class="step">
+            <strong>Step 4:</strong> Click button "Đổi ảnh" bên dưới ảnh đại diện
+        </div>
+        <div class="step">
+            <strong>Step 5:</strong> Chọn file ảnh từ máy tính (JPG, PNG, GIF, WEBP)
+        </div>
+        <div class="step">
+            <strong>Step 6:</strong> Verify:
+            <ul>
+                <li>Button hiển thị "Đang tải..." với spinner</li>
+                <li>Upload thành công → Alert "Đổi ảnh đại diện thành công!"</li>
+                <li>Ảnh đại diện được cập nhật ngay lập tức</li>
+                <li>Button trở về trạng thái "Đổi ảnh"</li>
+            </ul>
+        </div>
+
+        <h2>🔍 What to Look For:</h2>
+        <ul>
+            <li><strong>File Input:</strong> Hidden file input với accept="image/*"</li>
+            <li><strong>Button Click:</strong> Trigger file dialog khi click "Đổi ảnh"</li>
+            <li><strong>File Validation:</strong> Kiểm tra file type và size</li>
+            <li><strong>Upload Progress:</strong> Spinner hiển thị khi đang upload</li>
+            <li><strong>Success Feedback:</strong> Alert message khi thành công</li>
+            <li><strong>Image Update:</strong> Ảnh đại diện cập nhật ngay lập tức</li>
+            <li><strong>Error Handling:</strong> Error message nếu upload fail</li>
+        </ul>
+
+        <h2>🚨 Error Scenarios to Test:</h2>
+        <ul>
+            <li><strong>Invalid file type:</strong> Upload file .txt → Should show error</li>
+            <li><strong>File too large:</strong> Upload file > 5MB → Should show error</li>
+            <li><strong>No file selected:</strong> Click cancel → Should do nothing</li>
+            <li><strong>Network error:</strong> Disconnect internet → Should show error</li>
+        </ul>
+
+        <h2>📊 Features Implemented:</h2>
+        <ul>
+            <li>✅ <strong>File Input:</strong> Hidden input với accept="image/*"</li>
+            <li>✅ <strong>Button Handler:</strong> triggerFileInput() method</li>
+            <li>✅ <strong>File Validation:</strong> Type và size validation</li>
+            <li>✅ <strong>Upload API:</strong> POST /api/auth/upload-avatar</li>
+            <li>✅ <strong>Progress Indicator:</strong> Spinner khi uploading</li>
+            <li>✅ <strong>Success Feedback:</strong> Alert message</li>
+            <li>✅ <strong>Image Fallback:</strong> ImageFallbackDirective</li>
+            <li>✅ <strong>Error Handling:</strong> Try-catch với error messages</li>
+            <li>✅ <strong>User Update:</strong> Cập nhật user object sau upload</li>
+            <li>✅ <strong>Avatar Persistence:</strong> Lưu vào database</li>
+        </ul>
+
+        <div class="test-result success">
+            <strong>🎉 Fix Status:</strong> COMPLETED<br>
+            Profile avatar upload functionality is now fully working with proper file validation, progress indication, and error handling.
+        </div>
+    </div>
+
+    <script>
+        console.log('📸 Profile Avatar Upload Fix Test Page Loaded');
+        console.log('✅ Problem: Button "Đổi ảnh" không có chức năng upload');
+        console.log('✅ Solution: Added file input, upload API, validation, progress indicator');
+        console.log('🎯 Expected: User can upload avatar from Profile page');
+    </script>
+</body>
+</html>

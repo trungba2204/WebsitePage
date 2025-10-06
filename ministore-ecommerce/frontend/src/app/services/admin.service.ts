@@ -13,6 +13,7 @@ import {
   CreateBlogRequest,
   UpdateBlogRequest
 } from '../models/admin.model';
+import { User } from '../models/user.model';
 import { Product, ProductResponse, Category } from '../models/product.model';
 import { Blog } from '../models/blog.model';
 import { BlogResponse } from '../services/blog.service';
@@ -187,5 +188,21 @@ export class AdminService {
 
   deleteTeamMember(id: number): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/team/${id}`);
+  }
+
+  // User Avatar Management
+  updateUserAvatar(avatarUrl: string): Observable<User> {
+    const token = this.adminAuthService.getToken();
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    console.log('🔍 AdminService updateUserAvatar - Updating avatar to:', avatarUrl);
+    console.log('🔍 AdminService updateUserAvatar - Token exists:', !!token);
+    
+    return this.http.put<User>(`${environment.apiUrl}/user/avatar`, { avatar: avatarUrl }, {
+      headers: headers
+    });
   }
 }

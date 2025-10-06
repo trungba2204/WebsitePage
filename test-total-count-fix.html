@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Total Products Count Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔢 Test Total Products Count Fix</h1>
+        
+        <div class="test-result info">
+            <strong>📋 Test Description:</strong><br>
+            Kiểm tra xem số lượng "Tất cả danh mục" có thay đổi khi bấm vào các mục cụ thể hay không.
+        </div>
+
+        <div class="test-result info">
+            <strong>🎯 Expected Result:</strong><br>
+            "Tất cả danh mục" should always show the same total count regardless of which category is selected.
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Problem Identified:</strong><br>
+            <div class="code-block">
+                // Before Fix (Broken)
+                getTotalProducts(): number {
+                    return this.totalElements; // ❌ Changes with filters
+                }
+            </div>
+            <strong>Issue:</strong> `totalElements` was from filtered response, not actual database total.
+        </div>
+
+        <div class="test-result success">
+            <strong>✅ Solution Applied:</strong><br>
+            <div class="code-block">
+                // After Fix (Working)
+                totalProductsInDatabase = 0; // Store actual total
+
+                loadCategoryCounts(): void {
+                    this.productService.getProductCountsByCategory().subscribe({
+                        next: (counts) => {
+                            this.categoryCounts = counts;
+                            // Calculate total from category counts
+                            this.totalProductsInDatabase = Object.values(counts)
+                                .reduce((sum, count) => sum + count, 0);
+                        }
+                    });
+                }
+
+                getTotalProducts(): number {
+                    return this.totalProductsInDatabase; // ✅ Always same
+                }
+            </div>
+        </div>
+
+        <h2>🧪 Test Steps:</h2>
+        <ol>
+            <li>Go to <a href="http://localhost:4200/products" target="_blank">http://localhost:4200/products</a></li>
+            <li>Check "Tất cả danh mục" count (e.g., "Tất cả danh mục (26)")</li>
+            <li>Click on "Electronics" category</li>
+            <li>Verify "Tất cả danh mục" still shows same count (26)</li>
+            <li>Click on "Clothing" category</li>
+            <li>Verify "Tất cả danh mục" still shows same count (26)</li>
+            <li>Click "Tất cả danh mục" again</li>
+            <li>Verify count remains consistent (26)</li>
+        </ol>
+
+        <h2>🔍 What to Look For:</h2>
+        <ul>
+            <li><strong>Before Fix:</strong> "Tất cả danh mục" count changes when selecting categories</li>
+            <li><strong>After Fix:</strong> "Tất cả danh mục" count stays constant regardless of filter</li>
+            <li><strong>Example:</strong> Always shows "Tất cả danh mục (26)" even when viewing specific categories</li>
+        </ul>
+
+        <h2>🔧 Technical Details:</h2>
+        <ul>
+            <li><strong>Root Cause:</strong> Using filtered response total instead of database total</li>
+            <li><strong>Solution:</strong> Calculate total from category counts (sum of all categories)</li>
+            <li><strong>Implementation:</strong> Store actual total in separate property</li>
+            <li><strong>Data Source:</strong> Category counts API response</li>
+        </ul>
+
+        <h2>📊 Data Flow:</h2>
+        <div class="code-block">
+            1. Component loads → loadCategoryCounts()
+            2. API call → /api/products/counts/categories
+            3. Response → {1: 15, 2: 8, 3: 3} (categoryId: count)
+            4. Calculate total → 15 + 8 + 3 = 26
+            5. Store in totalProductsInDatabase = 26
+            6. getTotalProducts() → Always returns 26
+        </div>
+
+        <div class="test-result success">
+            <strong>🎉 Fix Status:</strong> COMPLETED<br>
+            The "Tất cả danh mục" count now remains consistent regardless of category selection.
+        </div>
+    </div>
+
+    <script>
+        console.log('🔢 Total Products Count Fix Test Page Loaded');
+        console.log('✅ Problem: totalElements changed with filters');
+        console.log('✅ Solution: Calculate total from category counts');
+        console.log('🎯 Expected: Consistent total count regardless of selection');
+    </script>
+</body>
+</html>

@@ -49,11 +49,14 @@ export class AppComponent implements OnInit {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event) => {
         const url = (event as NavigationEnd).url;
-        this.isAdminRoute = url.startsWith('/admin') && !url.includes('/admin/login');
+        // Hide navbar/footer for ALL admin routes including login
+        this.isAdminRoute = url.startsWith('/admin');
+        console.log('🔍 AppComponent - Route changed:', url, 'isAdminRoute:', this.isAdminRoute);
       });
 
     // Set initial state
-    this.isAdminRoute = this.router.url.startsWith('/admin') && !this.router.url.includes('/admin/login');
+    this.isAdminRoute = this.router.url.startsWith('/admin');
+    console.log('🔍 AppComponent - Initial route:', this.router.url, 'isAdminRoute:', this.isAdminRoute);
   }
 }
 

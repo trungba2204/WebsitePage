@@ -144,7 +144,25 @@ export class AdminAuthService {
   }
 
   updateAdminAvatar(updatedUser: User): void {
-    localStorage.setItem('admin_user', JSON.stringify(updatedUser));
-    this.adminUserSignal.set(updatedUser);
+    console.log('🔍 AdminAuthService updateAdminAvatar - Received updated user:', updatedUser);
+    
+    // Get current admin user data to preserve existing fields
+    const currentAdminUser = this.adminUserSignal();
+    console.log('🔍 AdminAuthService updateAdminAvatar - Current admin user:', currentAdminUser);
+    
+    if (currentAdminUser) {
+      // Merge updated avatar with existing user data to preserve name and other fields
+      const mergedUser = { ...currentAdminUser, avatar: updatedUser.avatar };
+      console.log('🔍 AdminAuthService updateAdminAvatar - Merged user data:', mergedUser);
+      
+      localStorage.setItem('admin_user', JSON.stringify(mergedUser));
+      this.adminUserSignal.set(mergedUser);
+      console.log('✅ AdminAuthService updateAdminAvatar - Avatar updated while preserving other fields');
+    } else {
+      // Fallback: use the updated user data as-is
+      console.log('⚠️ AdminAuthService updateAdminAvatar - No current user found, using updated user as-is');
+      localStorage.setItem('admin_user', JSON.stringify(updatedUser));
+      this.adminUserSignal.set(updatedUser);
+    }
   }
 }

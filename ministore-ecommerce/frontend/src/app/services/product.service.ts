@@ -67,5 +67,13 @@ export class ProductService {
         switchMap(response => of(response.content))
       );
   }
+
+  getProductCountByCategory(categoryId: number): Observable<number> {
+    return this.http.get<number>(`${this.API_URL}/counts/category/${categoryId}`);
+  }
+
+  getProductCountsByCategory(): Observable<{[key: number]: number}> {
+    return this.http.get<{[key: number]: number}>(`${this.API_URL}/counts/categories`);
+  }
 }
 

@@ -174,8 +174,8 @@ export class HeaderComponent implements OnInit {
         console.log('✅ HeaderComponent uploadAvatar - Image upload success:', response.url);
         
         // Update user avatar in database via AuthService
-        this.authService.updateUserAvatar(response.url).subscribe({
-          next: (updatedUser) => {
+        this.authService.uploadAvatar(file).subscribe({
+          next: (updatedUser: any) => {
             console.log('✅ HeaderComponent uploadAvatar - Avatar updated in database:', updatedUser);
             
             this.isUploadingAvatar = false;
@@ -189,7 +189,7 @@ export class HeaderComponent implements OnInit {
               'Ảnh đại diện đã được cập nhật thành công'
             );
           },
-          error: (dbError) => {
+          error: (dbError: any) => {
             this.isUploadingAvatar = false;
             console.error('❌ HeaderComponent uploadAvatar - Database update error:', dbError);
             this.notificationService.showError('Lỗi!', 'Không thể lưu ảnh đại diện vào database. Vui lòng thử lại.');
