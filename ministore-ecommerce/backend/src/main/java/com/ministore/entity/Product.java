@@ -32,6 +32,7 @@ public class Product {
     @Column(nullable = false)
     private BigDecimal price;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @ManyToOne

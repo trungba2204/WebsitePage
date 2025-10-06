@@ -196,7 +196,39 @@
               </div>
 
               <div class="form-group">
-                <label for="imageUrl" class="form-label">URL hình ảnh</label>
+                <label class="form-label">Hình ảnh đại diện</label>
+                
+                <!-- File Upload -->
+                <div class="upload-section mb-3">
+                  <div class="upload-area" [class.uploading]="isUploadingImage">
+                    <input
+                      type="file"
+                      id="imageFile"
+                      class="file-input"
+                      accept="image/*"
+                      (change)="onImageFileSelected($event)"
+                      [disabled]="isUploadingImage">
+                    <label for="imageFile" class="upload-label">
+                      @if (isUploadingImage) {
+                        <div class="upload-loading">
+                          <span class="spinner-border spinner-border-sm me-2"></span>
+                          Đang tải lên...
+                        </div>
+                      } @else {
+                        <div class="upload-content">
+                          <i class="bi bi-cloud-upload fs-1 text-primary"></i>
+                          <p class="mb-0">Chọn ảnh từ máy tính</p>
+                          <small class="text-muted">PNG, JPG, GIF tối đa 5MB</small>
+                        </div>
+                      }
+                    </label>
+                  </div>
+                </div>
+
+                <!-- URL Input (Alternative) -->
+                <div class="form-text mb-2">
+                  <small class="text-muted">Hoặc nhập URL ảnh:</small>
+                </div>
                 <input
                   type="url"
                   id="imageUrl"
@@ -204,6 +236,15 @@
                   [(ngModel)]="blogForm.imageUrl"
                   name="imageUrl"
                   placeholder="https://example.com/image.jpg">
+                
+                @if (blogForm.imageUrl) {
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage()">
+                      <i class="bi bi-trash me-1"></i>
+                      Xóa ảnh
+                    </button>
+                  </div>
+                }
               </div>
             </div>
 
@@ -225,7 +266,39 @@
               </div>
 
               <div class="form-group">
-                <label for="authorAvatar" class="form-label">Avatar tác giả</label>
+                <label class="form-label">Avatar tác giả</label>
+                
+                <!-- Avatar Upload -->
+                <div class="upload-section mb-3">
+                  <div class="upload-area upload-avatar" [class.uploading]="isUploadingAvatar">
+                    <input
+                      type="file"
+                      id="avatarFile"
+                      class="file-input"
+                      accept="image/*"
+                      (change)="onAvatarFileSelected($event)"
+                      [disabled]="isUploadingAvatar">
+                    <label for="avatarFile" class="upload-label">
+                      @if (isUploadingAvatar) {
+                        <div class="upload-loading">
+                          <span class="spinner-border spinner-border-sm me-2"></span>
+                          Đang tải lên...
+                        </div>
+                      } @else {
+                        <div class="upload-content">
+                          <i class="bi bi-person-circle fs-2 text-primary"></i>
+                          <p class="mb-0">Chọn avatar</p>
+                          <small class="text-muted">PNG, JPG tối đa 2MB</small>
+                        </div>
+                      }
+                    </label>
+                  </div>
+                </div>
+
+                <!-- URL Input (Alternative) -->
+                <div class="form-text mb-2">
+                  <small class="text-muted">Hoặc nhập URL avatar:</small>
+                </div>
                 <input
                   type="url"
                   id="authorAvatar"
@@ -233,6 +306,15 @@
                   [(ngModel)]="blogForm.authorAvatar"
                   name="authorAvatar"
                   placeholder="https://example.com/avatar.jpg">
+                
+                @if (blogForm.authorAvatar) {
+                  <div class="mt-2">
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeAvatar()">
+                      <i class="bi bi-trash me-1"></i>
+                      Xóa avatar
+                    </button>
+                  </div>
+                }
               </div>
             </div>
 

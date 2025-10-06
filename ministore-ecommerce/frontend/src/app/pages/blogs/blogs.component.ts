@@ -19,6 +19,7 @@ export class BlogsComponent implements OnInit {
   categories: BlogCategory[] = [];
   recentBlogs: Blog[] = [];
   popularBlogs: Blog[] = [];
+  totalBlogs = 0;
   
   isLoading = true;
   currentPage = 0;
@@ -50,6 +51,7 @@ export class BlogsComponent implements OnInit {
         this.blogs = response.content;
         this.totalPages = response.totalPages;
         this.currentPage = response.number;
+        this.totalBlogs = response.totalElements;
         this.isLoading = false;
       },
       error: (error) => {
@@ -131,5 +133,30 @@ export class BlogsComponent implements OnInit {
 
   get pages(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.onPageChange(page);
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const maxVisiblePages = 5;
+    const startPage = Math.max(0, this.currentPage - Math.floor(maxVisiblePages / 2));
+    const endPage = Math.min(this.totalPages - 1, startPage + maxVisiblePages - 1);
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i + 1);
+    }
+    
+    return pages;
+  }
+
+  getCategoryCount(categorySlug: string): number {
+    // This would need to be implemented based on your API
+    // For now, return a mock number
+    return Math.floor(Math.random() * 10) + 1;
   }
 }

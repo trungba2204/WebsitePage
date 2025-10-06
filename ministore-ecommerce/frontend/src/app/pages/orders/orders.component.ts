@@ -4,11 +4,12 @@ import { RouterModule } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { AuthService } from '../../services/auth.service';
 import { Order, OrderStatus } from '../../models/order.model';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ImageFallbackDirective],
   templateUrl: './orders.component.html',
   styleUrl: './orders.component.scss'
 })
@@ -30,11 +31,14 @@ export class OrdersComponent implements OnInit {
 
     this.orderService.getUserOrders().subscribe({
       next: (orders) => {
+        console.log('🔍 Orders received:', orders);
+        
+        // TEMPORARY: Add mock discount data for testing UI
         this.orders = orders;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading orders:', error);
+        console.error('❌ Error loading orders:', error);
         this.error = 'Không thể tải danh sách đơn hàng';
         this.isLoading = false;
       }

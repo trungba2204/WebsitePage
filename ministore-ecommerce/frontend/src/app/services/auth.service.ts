@@ -23,8 +23,12 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<AuthResponse> {
+    console.log('🔍 AuthService login - Attempting user login:', { email: credentials.email });
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials).pipe(
-      tap(response => this.handleAuthResponse(response))
+      tap(response => {
+        console.log('✅ AuthService login - User login successful:', response);
+        this.handleAuthResponse(response);
+      })
     );
   }
 
@@ -47,10 +51,30 @@ export class AuthService {
   }
 
   private handleAuthResponse(response: AuthResponse): void {
+    console.log('🔍 AuthService handleAuthResponse - Storing user data:', response.user);
+    console.log('🔍 AuthService handleAuthResponse - User avatar:', response.user.avatar);
+    
+    // Preserve existing avatar if new response doesn't have one
+    const existingUserStr = localStorage.getItem('user');
+    let finalUser = response.user;
+    
+    if (existingUserStr && !response.user.avatar) {
+      try {
+        const existingUser = JSON.parse(existingUserStr);
+        if (existingUser.avatar) {
+          console.log('🔍 AuthService handleAuthResponse - Preserving existing avatar:', existingUser.avatar);
+          finalUser = { ...response.user, avatar: existingUser.avatar };
+        }
+      } catch (error) {
+        console.warn('⚠️ AuthService handleAuthResponse - Error parsing existing user:', error);
+      }
+    }
+    
     localStorage.setItem(this.TOKEN_KEY, response.token);
-    localStorage.setItem('user', JSON.stringify(response.user));
-    this.currentUser.set(response.user);
+    localStorage.setItem('user', JSON.stringify(finalUser));
+    this.currentUser.set(finalUser);
     this.isAuthenticated.set(true);
+    console.log('✅ AuthService handleAuthResponse - User authenticated successfully with avatar:', finalUser.avatar);
   }
 
   private loadUserFromStorage(): void {
@@ -60,12 +84,17 @@ export class AuthService {
     if (token && userStr) {
       try {
         const user = JSON.parse(userStr) as User;
+        console.log('🔍 AuthService loadUserFromStorage - Loading user from storage:', user);
+        console.log('🔍 AuthService loadUserFromStorage - User avatar:', user.avatar);
         this.currentUser.set(user);
         this.isAuthenticated.set(true);
+        console.log('✅ AuthService loadUserFromStorage - User loaded successfully');
       } catch (error) {
-        console.error('Error parsing user data:', error);
+        console.error('❌ AuthService loadUserFromStorage - Error parsing user data:', error);
         this.logout();
       }
+    } else {
+      console.log('🔍 AuthService loadUserFromStorage - No user data found in storage');
     }
   }
 
@@ -74,6 +103,24 @@ export class AuthService {
       tap(user => {
         this.currentUser.set(user);
         localStorage.setItem('user', JSON.stringify(user));
+      })
+    );
+  }
+
+  updateCurrentUser(updatedUser: User): void {
+    console.log('🔍 AuthService updateCurrentUser - Updating user data:', updatedUser);
+    console.log('🔍 AuthService updateCurrentUser - New avatar:', updatedUser.avatar);
+    this.currentUser.set(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+    console.log('✅ AuthService updateCurrentUser - User data updated successfully');
+  }
+
+  updateUserAvatar(avatarUrl: string): Observable<User> {
+    console.log('🔍 AuthService updateUserAvatar - Updating avatar to:', avatarUrl);
+    return this.http.put<User>(`${this.API_URL}/user/avatar`, { avatar: avatarUrl }).pipe(
+      tap(updatedUser => {
+        console.log('✅ AuthService updateUserAvatar - Avatar updated successfully:', updatedUser);
+        this.updateCurrentUser(updatedUser);
       })
     );
   }

@@ -47,14 +47,35 @@ export class LoginComponent {
   isLoading = false;
 
   onSubmit(): void {
+    if (!this.credentials.email || !this.credentials.password) {
+      console.error('❌ LoginComponent onSubmit - Missing credentials');
+      return;
+    }
+
     this.isLoading = true;
+    console.log('🔍 LoginComponent onSubmit - Attempting user login:', { email: this.credentials.email });
+
     this.authService.login(this.credentials).subscribe({
-      next: () => {
+      next: (response) => {
+        this.isLoading = false;
+        console.log('✅ LoginComponent onSubmit - User login successful, navigating to home');
         this.router.navigate(['/']);
       },
       error: (error) => {
-        console.error('Login error:', error);
         this.isLoading = false;
+        console.error('❌ LoginComponent onSubmit - User login error:', error);
+        console.error('❌ Error details:', {
+          status: error.status,
+          message: error.message,
+          url: error.url
+        });
+        
+        // Show appropriate error message
+        if (error.status === 401) {
+          alert('❌ Email hoặc mật khẩu không đúng!\n\n💡 Tài khoản mặc định:\n• Admin: admin@ministore.com / admin123\n• User: Cần đăng ký tài khoản mới');
+        } else {
+          alert('❌ Lỗi đăng nhập. Vui lòng thử lại!');
+        }
       }
     });
   }

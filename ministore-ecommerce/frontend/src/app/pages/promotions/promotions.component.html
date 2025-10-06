@@ -1,0 +1,189 @@
+<div class="promotions-page">
+  <div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+      <div class="col-12 text-center">
+        <h1 class="display-4 fw-bold text-primary mb-3">
+          <i class="bi bi-ticket-perforated me-3"></i>
+          Mã Giảm Giá Hot
+        </h1>
+        <p class="lead text-muted">
+          Săn ngay những mã giảm giá hấp dẫn để tiết kiệm chi phí mua sắm
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <span class="me-3 fw-bold">Lọc theo loại:</span>
+              <div class="btn-group" role="group">
+                @for (category of categories; track category.value) {
+                  <button 
+                    type="button" 
+                    class="btn"
+                    [class.btn-primary]="selectedCategory === category.value"
+                    [class.btn-outline-primary]="selectedCategory !== category.value"
+                    (click)="selectedCategory = category.value">
+                    {{ category.label }}
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    @if (isLoading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải mã giảm giá...</p>
+      </div>
+    } @else {
+      <!-- Discount Codes Grid -->
+      <div class="row">
+        @for (code of getFilteredDiscountCodes(); track code.id) {
+          <div class="col-lg-4 col-md-6 mb-4">
+            <div class="card discount-card h-100">
+              <div class="card-body">
+                <!-- Discount Code -->
+                <div class="text-center mb-3">
+                  <div class="discount-code">
+                    <code class="fs-4 fw-bold text-primary">{{ code.code }}</code>
+                  </div>
+                  <button 
+                    class="btn btn-sm btn-outline-primary mt-2"
+                    (click)="copyToClipboard(code.code)"
+                    title="Sao chép mã">
+                    <i class="bi bi-clipboard me-1"></i>
+                    Sao chép
+                  </button>
+                </div>
+
+                <!-- Discount Value -->
+                <div class="text-center mb-3">
+                  @if (code.discountType === 'PERCENTAGE') {
+                    <span class="discount-value text-success fw-bold fs-3">
+                      -{{ code.discountValue }}%
+                    </span>
+                  } @else {
+                    <span class="discount-value text-success fw-bold fs-3">
+                      -{{ formatPrice(code.discountValue) }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                  <p class="text-muted mb-2">Mã giảm giá {{ code.discountType === 'PERCENTAGE' ? 'phần trăm' : 'số tiền cố định' }}</p>
+                </div>
+
+                <!-- Conditions -->
+                <div class="conditions mb-3">
+                  @if (code.minOrderAmount) {
+                    <div class="condition-item">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <small>Đơn hàng tối thiểu: {{ formatPrice(code.minOrderAmount) }}</small>
+                    </div>
+                  }
+                  @if (code.maxDiscountAmount) {
+                    <div class="condition-item">
+                      <i class="bi bi-info-circle me-2"></i>
+                      <small>Giảm tối đa: {{ formatPrice(code.maxDiscountAmount) }}</small>
+                    </div>
+                  }
+                  @if (code.usageLimit) {
+                    <div class="condition-item">
+                      <i class="bi bi-people me-2"></i>
+                      <small>Còn lại: {{ code.usageLimit - code.usedCount }} lượt</small>
+                    </div>
+                  }
+                </div>
+
+                <!-- Time Info -->
+                <div class="time-info mb-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                      <i class="bi bi-calendar me-1"></i>
+                      Hết hạn: {{ formatDate(code.endDate) }}
+                    </small>
+                    <span [ngClass]="getStatusClass(code)">
+                      {{ getStatusText(code) }}
+                    </span>
+                  </div>
+                  @if (getDaysRemaining(code.endDate) > 0) {
+                    <div class="progress mt-2" style="height: 6px;">
+                      <div class="progress-bar bg-warning" 
+                           [style.width.%]="getProgressWidth(code.endDate)">
+                      </div>
+                    </div>
+                    <small class="text-warning mt-1 d-block">
+                      Còn {{ getDaysRemaining(code.endDate) }} ngày
+                    </small>
+                  }
+                </div>
+
+                <!-- Action Button -->
+                <div class="text-center">
+                  <a 
+                    routerLink="/products" 
+                    class="btn btn-primary w-100">
+                    <i class="bi bi-cart-plus me-2"></i>
+                    Mua ngay
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Empty State -->
+      @if (getFilteredDiscountCodes().length === 0) {
+        <div class="text-center py-5">
+          <i class="bi bi-ticket-perforated text-muted" style="font-size: 4rem;"></i>
+          <h4 class="mt-3">Không có mã giảm giá nào</h4>
+          <p class="text-muted">Hiện tại chưa có mã giảm giá nào phù hợp với bộ lọc của bạn</p>
+          <button 
+            class="btn btn-outline-primary"
+            (click)="selectedCategory = 'all'">
+            Xem tất cả mã giảm giá
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Call to Action -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <div class="card bg-primary text-white">
+          <div class="card-body text-center py-5">
+            <h3 class="mb-3">Không tìm thấy mã phù hợp?</h3>
+            <p class="mb-4">Đăng ký nhận thông báo để không bỏ lỡ những ưu đãi hấp dẫn nhất!</p>
+            <div class="row justify-content-center">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <input 
+                    type="email" 
+                    class="form-control" 
+                    placeholder="Nhập email của bạn...">
+                  <button class="btn btn-light" type="button">
+                    <i class="bi bi-envelope me-2"></i>
+                    Đăng ký
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

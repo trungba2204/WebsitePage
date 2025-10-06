@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService } from '../../services/order.service';
 import { Order, OrderStatus } from '../../models/order.model';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
 @Component({
   selector: 'app-order-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ImageFallbackDirective],
   templateUrl: './order-detail.component.html',
   styleUrl: './order-detail.component.scss'
 })
@@ -46,11 +47,13 @@ export class OrderDetailComponent implements OnInit {
 
     this.orderService.getOrderById(this.orderId).subscribe({
       next: (order) => {
+        console.log('🔍 Order detail received:', order);
+        
         this.order = order;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading order detail:', error);
+        console.error('❌ Error loading order detail:', error);
         this.error = 'Không thể tải chi tiết đơn hàng';
         this.isLoading = false;
       }

@@ -63,6 +63,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/contact/contact.component').then(m => m.ContactComponent)
   },
   {
+    path: 'promotions',
+    loadComponent: () => import('./pages/promotions/promotions.component').then(m => m.PromotionsComponent)
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./pages/admin/admin.routes').then(m => m.adminRoutes)
   },

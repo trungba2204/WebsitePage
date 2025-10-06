@@ -5,8 +5,10 @@ import { Router } from '@angular/router';
 import { CartService } from '../../services/cart.service';
 import { OrderService } from '../../services/order.service';
 import { NotificationService } from '../../services/notification.service';
+import { DiscountCodeService } from '../../services/discount-code.service';
 import { Cart, CartItem } from '../../models/cart.model';
 import { CreateOrderRequest, OrderStatus } from '../../models/order.model';
+import { DiscountCodeValidation, ApplyDiscountRequest } from '../../models/discount-code.model';
 
 @Component({
   selector: 'app-checkout',
@@ -19,6 +21,7 @@ export class CheckoutComponent implements OnInit {
   cartService = inject(CartService);
   orderService = inject(OrderService);
   notificationService = inject(NotificationService);
+  discountCodeService = inject(DiscountCodeService);
   router = inject(Router);
 
   cart: Cart | null = null;
@@ -37,6 +40,11 @@ export class CheckoutComponent implements OnInit {
 
   paymentMethod = 'cod'; // Cash on delivery
   note = '';
+  
+  // Discount code
+  discountCode = '';
+  discountValidation: DiscountCodeValidation | null = null;
+  isApplyingDiscount = false;
 
   ngOnInit(): void {
     this.cartService.getCart().subscribe({
@@ -63,12 +71,23 @@ export class CheckoutComponent implements OnInit {
     const orderRequest: CreateOrderRequest = {
       shippingAddress: this.shippingAddress,
       paymentMethod: this.paymentMethod,
-      note: this.note
+      note: this.note,
+      discountCode: this.discountValidation?.isValid ? this.discountCode : undefined,
+      discountAmount: this.discountValidation?.isValid ? this.discountValidation.discountAmount : undefined
     };
 
     this.orderService.createOrder(orderRequest).subscribe({
       next: (order) => {
         this.isProcessing = false;
+        console.log('🔍 Order created successfully:', order);
+        console.log('Discount info in created order:', {
+          discountCode: order.discountCode,
+          discountAmount: order.discountAmount,
+          originalAmount: order.originalAmount,
+          totalAmount: order.totalAmount,
+          hasDiscount: !!(order.discountCode && order.discountAmount)
+        });
+        
         // Show success notification
         this.notificationService.showSuccess(
           'Đặt hàng thành công!',
@@ -102,7 +121,49 @@ export class CheckoutComponent implements OnInit {
   }
 
   getTotalAmount(): number {
-    return this.cart?.totalPrice || 0;
+    const subtotal = this.cart?.totalPrice || 0;
+    const discount = this.discountValidation?.discountAmount || 0;
+    return Math.max(0, subtotal - discount);
+  }
+
+  applyDiscountCode(): void {
+    if (!this.discountCode.trim() || !this.cart) {
+      return;
+    }
+
+    this.isApplyingDiscount = true;
+    
+    const request: ApplyDiscountRequest = {
+      code: this.discountCode.trim(),
+      orderAmount: this.cart.totalPrice
+    };
+
+    this.discountCodeService.validateDiscountCode(request).subscribe({
+      next: (validation) => {
+        this.isApplyingDiscount = false;
+        this.discountValidation = validation;
+        
+        if (validation.isValid) {
+          this.notificationService.showSuccess(
+            'Thành công!',
+            `Mã giảm giá "${this.discountCode}" đã được áp dụng. Giảm ${this.formatPrice(validation.discountAmount)}`
+          );
+        } else {
+          this.notificationService.showError('Lỗi!', validation.message);
+        }
+      },
+      error: (error) => {
+        this.isApplyingDiscount = false;
+        console.error('Error validating discount code:', error);
+        this.notificationService.showError('Lỗi!', 'Không thể kiểm tra mã giảm giá. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  removeDiscountCode(): void {
+    this.discountCode = '';
+    this.discountValidation = null;
+    this.notificationService.showSuccess('Thành công!', 'Đã xóa mã giảm giá');
   }
 
   formatPrice(price: number): string {

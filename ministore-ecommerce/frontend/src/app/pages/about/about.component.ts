@@ -1,23 +1,63 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
+
+interface TeamMember {
+  id: number;
+  name: string;
+  position: string;
+  image: string;
+  bio: string;
+  isActive: boolean;
+}
 
 @Component({
   selector: 'app-about',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ImageFallbackDirective],
   templateUrl: './about.component.html',
   styleUrl: './about.component.scss'
 })
-export class AboutComponent {
+export class AboutComponent implements OnInit {
   
-  teamMembers = [
-    {
-      name: 'Team Đoàn Kết Hai Bà Trưng',
-      position: 'Đội ngũ phát triển MiniStore',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
-      bio: 'Đội ngũ tài năng và đoàn kết, với tinh thần sáng tạo và cam kết mang đến những sản phẩm tốt nhất cho khách hàng. Chúng tôi cùng nhau xây dựng MiniStore thành nền tảng thương mại điện tử hàng đầu Việt Nam.'
-    }
-  ];
+  teamMembers: TeamMember[] = [];
+  isLoading = false;
+
+  constructor(private http: HttpClient) {}
+
+  // Expose encodeURIComponent to template
+  encodeURIComponent = encodeURIComponent;
+
+  ngOnInit(): void {
+    this.loadTeamMembers();
+  }
+
+  loadTeamMembers(): void {
+    this.isLoading = true;
+    this.http.get<TeamMember[]>(`${environment.apiUrl}/team`).subscribe({
+      next: (members) => {
+        this.teamMembers = members;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading team members:', error);
+        // Fallback to default team member if API fails
+        this.teamMembers = [
+          {
+            id: 1,
+            name: 'Team Đoàn Kết Hai Bà Trưng',
+            position: 'Đội ngũ phát triển MiniStore',
+            image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300',
+            bio: 'Đội ngũ tài năng và đoàn kết, với tinh thần sáng tạo và cam kết mang đến những sản phẩm tốt nhất cho khách hàng. Chúng tôi cùng nhau xây dựng MiniStore thành nền tảng thương mại điện tử hàng đầu Việt Nam.',
+            isActive: true
+          }
+        ];
+        this.isLoading = false;
+      }
+    });
+  }
 
   milestones = [
     {

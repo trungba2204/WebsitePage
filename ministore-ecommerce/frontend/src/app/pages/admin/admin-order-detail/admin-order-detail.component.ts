@@ -22,6 +22,13 @@ export class AdminOrderDetailComponent implements OnInit {
   isLoading = false;
   isUpdating = false;
 
+  // Confirmation modal
+  showConfirmModal = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  confirmNewStatus: string | null = null;
+  isConfirming = false;
+
   // Status options
   statusOptions = [
     { value: 'PENDING', label: 'Chờ xử lý', class: 'bg-warning' },
@@ -61,25 +68,42 @@ export class AdminOrderDetailComponent implements OnInit {
     if (!this.order) return;
 
     const statusText = this.getStatusText(newStatus);
+    const currentStatusText = this.getStatusText(this.order.status);
     
-    if (!confirm(`Bạn có chắc chắn muốn cập nhật đơn hàng ${this.order.orderNumber} thành "${statusText}"?`)) {
-      return;
-    }
+    this.confirmTitle = 'Xác nhận cập nhật trạng thái đơn hàng';
+    this.confirmMessage = `Bạn có chắc chắn muốn cập nhật đơn hàng ${this.order.orderNumber} từ "${currentStatusText}" thành "${statusText}"?`;
+    this.confirmNewStatus = newStatus;
+    this.showConfirmModal = true;
+  }
 
-    this.isUpdating = true;
+  confirmStatusUpdate(): void {
+    if (!this.order) return;
 
-    this.adminService.updateOrderStatus(this.order.id, newStatus).subscribe({
+    this.isConfirming = true;
+
+    this.adminService.updateOrderStatus(this.order.id, this.confirmNewStatus!).subscribe({
       next: () => {
-        this.isUpdating = false;
-        this.notificationService.showSuccess('Thành công!', 'Trạng thái đơn hàng đã được cập nhật');
+        this.isConfirming = false;
+        this.showConfirmModal = false;
+        this.notificationService.showSuccess(
+          'Thành công!', 
+          `Đơn hàng ${this.order!.orderNumber} đã được cập nhật thành "${this.getStatusText(this.confirmNewStatus!)}"`
+        );
         this.loadOrder(this.order!.id);
       },
       error: (error) => {
-        this.isUpdating = false;
+        this.isConfirming = false;
         console.error('Error updating order status:', error);
         this.notificationService.showError('Lỗi!', 'Không thể cập nhật trạng thái đơn hàng');
       }
     });
+  }
+
+  cancelStatusUpdate(): void {
+    this.showConfirmModal = false;
+    this.confirmNewStatus = null;
+    this.confirmMessage = '';
+    this.confirmTitle = '';
   }
 
   formatDate(date: Date): string {

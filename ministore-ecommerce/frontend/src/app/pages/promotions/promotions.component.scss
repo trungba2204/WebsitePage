@@ -1,0 +1,198 @@
+.promotions-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
+
+  .container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .discount-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+    
+    &:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .discount-code {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      
+      code {
+        color: white !important;
+        background: none !important;
+        padding: 0;
+        font-size: 1.5rem !important;
+        letter-spacing: 2px;
+      }
+    }
+
+    .discount-value {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .conditions {
+      .condition-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0;
+        
+        i {
+          color: #6c757d;
+          width: 16px;
+        }
+        
+        small {
+          color: #6c757d;
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .time-info {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      
+      .progress {
+        border-radius: 10px;
+        background: rgba(255, 193, 7, 0.2);
+        
+        .progress-bar {
+          border-radius: 10px;
+          background: linear-gradient(90deg, #ffc107 0%, #fd7e14 100%);
+        }
+      }
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      border-radius: 25px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+      }
+    }
+
+    .btn-outline-primary {
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+
+  .card.bg-primary {
+    border-radius: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+    
+    .input-group {
+      .form-control {
+        border-radius: 25px 0 0 25px;
+        border: none;
+        padding: 0.75rem 1.5rem;
+      }
+      
+      .btn-light {
+        border-radius: 0 25px 25px 0;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background: #f8f9fa;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  .badge {
+    &.bg-success {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    }
+    
+    &.bg-warning {
+      background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%) !important;
+      color: #000 !important;
+    }
+    
+    &.bg-secondary {
+      background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+    }
+  }
+
+  .btn-group {
+    .btn {
+      border-radius: 25px;
+      margin: 0 0.25rem;
+      transition: all 0.3s ease;
+      
+      &.btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+      }
+      
+      &.btn-outline-primary {
+        border: 2px solid #667eea;
+        color: #667eea;
+        
+        &:hover {
+          background: #667eea;
+          color: white;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    .container {
+      margin: 1rem;
+      border-radius: 15px;
+    }
+    
+    .discount-card {
+      margin-bottom: 1rem;
+    }
+    
+    .display-4 {
+      font-size: 2rem;
+    }
+    
+    .btn-group {
+      flex-direction: column;
+      
+      .btn {
+        margin: 0.25rem 0;
+        border-radius: 15px;
+      }
+    }
+  }
+}

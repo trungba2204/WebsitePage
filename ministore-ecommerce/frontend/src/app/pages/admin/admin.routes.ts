@@ -69,6 +69,14 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-users/admin-users.component').then(m => m.AdminUsersComponent)
       },
       {
+        path: 'discount-codes',
+        loadComponent: () => import('./admin-discount-codes/admin-discount-codes.component').then(m => m.AdminDiscountCodesComponent)
+      },
+      {
+        path: 'team',
+        loadComponent: () => import('./admin-team/admin-team.component').then(m => m.AdminTeamComponent)
+      },
+      {
         path: 'settings',
         loadComponent: () => import('./admin-settings/admin-settings.component').then(m => m.AdminSettingsComponent)
       }

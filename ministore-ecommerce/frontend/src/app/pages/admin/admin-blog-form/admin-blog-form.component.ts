@@ -38,6 +38,12 @@ export class AdminBlogFormComponent implements OnInit {
   };
 
   tagInput = '';
+  
+  // Image upload states
+  isUploadingImage = false;
+  isUploadingAvatar = false;
+  selectedImageFile: File | null = null;
+  selectedAvatarFile: File | null = null;
 
   ngOnInit(): void {
     // Check if we're editing
@@ -192,5 +198,96 @@ export class AdminBlogFormComponent implements OnInit {
 
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString('vi-VN');
+  }
+
+  // Image upload methods
+  onImageFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi!', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi!', 'Kích thước file không được vượt quá 5MB');
+        return;
+      }
+      
+      this.selectedImageFile = file;
+      this.uploadImage(file);
+    }
+  }
+
+  onAvatarFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi!', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+      
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi!', 'Kích thước file không được vượt quá 2MB');
+        return;
+      }
+      
+      this.selectedAvatarFile = file;
+      this.uploadAvatar(file);
+    }
+  }
+
+  private uploadImage(file: File): void {
+    this.isUploadingImage = true;
+    
+    this.adminService.uploadImage(file).subscribe({
+      next: (response) => {
+        this.blogForm.imageUrl = response.url;
+        this.isUploadingImage = false;
+        this.notificationService.showSuccess('Thành công!', 'Ảnh đại diện đã được tải lên');
+      },
+      error: (error) => {
+        console.error('Error uploading image:', error);
+        this.isUploadingImage = false;
+        this.notificationService.showError('Lỗi!', 'Không thể tải lên ảnh đại diện');
+        this.selectedImageFile = null;
+      }
+    });
+  }
+
+  private uploadAvatar(file: File): void {
+    this.isUploadingAvatar = true;
+    
+    this.adminService.uploadImage(file).subscribe({
+      next: (response) => {
+        this.blogForm.authorAvatar = response.url;
+        this.isUploadingAvatar = false;
+        this.notificationService.showSuccess('Thành công!', 'Ảnh avatar đã được tải lên');
+      },
+      error: (error) => {
+        console.error('Error uploading avatar:', error);
+        this.isUploadingAvatar = false;
+        this.notificationService.showError('Lỗi!', 'Không thể tải lên ảnh avatar');
+        this.selectedAvatarFile = null;
+      }
+    });
+  }
+
+  removeImage(): void {
+    this.blogForm.imageUrl = '';
+    this.selectedImageFile = null;
+  }
+
+  removeAvatar(): void {
+    this.blogForm.authorAvatar = '';
+    this.selectedAvatarFile = null;
   }
 }

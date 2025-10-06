@@ -52,14 +52,10 @@ export class AdminLoginComponent implements OnInit {
         );
         
         console.log('AdminLoginComponent: Attempting redirect to /admin/dashboard');
-        this.router.navigate(['/admin/dashboard']).then(success => {
-          console.log('AdminLoginComponent: Redirect result:', success);
-          if (success) {
-            console.log('AdminLoginComponent: Redirect successful');
-          } else {
-            console.error('AdminLoginComponent: Redirect failed');
-          }
-        });
+        
+        // Use window.location.href for immediate redirect
+        console.log('AdminLoginComponent: Redirecting via window.location.href');
+        window.location.href = '/admin/dashboard';
       },
       error: (error) => {
         console.error('AdminLoginComponent: Login error', error);

@@ -25,6 +25,14 @@ export class AdminOrdersComponent implements OnInit {
   isUpdating = false;
   updatingOrderId: number | null = null;
 
+  // Confirmation modal
+  showConfirmModal = false;
+  confirmTitle = '';
+  confirmMessage = '';
+  confirmOrderId: number | null = null;
+  confirmNewStatus: OrderStatus | null = null;
+  isConfirming = false;
+
   // Pagination
   currentPage = 0;
   pageSize = 10;
@@ -103,28 +111,44 @@ export class AdminOrdersComponent implements OnInit {
 
   updateOrderStatus(order: Order, newStatus: OrderStatus): void {
     const statusText = this.getStatusText(newStatus);
+    const currentStatusText = this.getStatusText(order.status);
     
-    if (!confirm(`Bạn có chắc chắn muốn cập nhật đơn hàng ${order.orderNumber} thành "${statusText}"?`)) {
-      return;
-    }
+    this.confirmTitle = 'Xác nhận cập nhật trạng thái đơn hàng';
+    this.confirmMessage = `Bạn có chắc chắn muốn cập nhật đơn hàng ${order.orderNumber} từ "${currentStatusText}" thành "${statusText}"?`;
+    this.confirmOrderId = order.id;
+    this.confirmNewStatus = newStatus;
+    this.showConfirmModal = true;
+  }
 
-    this.isUpdating = true;
-    this.updatingOrderId = order.id;
+  confirmStatusUpdate(): void {
+    if (!this.confirmOrderId) return;
 
-    this.adminOrderService.updateOrderStatus(order.id, newStatus).subscribe({
+    this.isConfirming = true;
+
+    this.adminOrderService.updateOrderStatus(this.confirmOrderId, this.confirmNewStatus as OrderStatus).subscribe({
       next: () => {
-        this.isUpdating = false;
-        this.updatingOrderId = null;
-        this.notificationService.showSuccess('Thành công!', 'Trạng thái đơn hàng đã được cập nhật');
+        this.isConfirming = false;
+        this.showConfirmModal = false;
+        this.notificationService.showSuccess(
+          'Thành công!', 
+          `Đơn hàng đã được cập nhật thành "${this.getStatusText(this.confirmNewStatus!)}"`
+        );
         this.loadOrders();
       },
       error: (error) => {
-        this.isUpdating = false;
-        this.updatingOrderId = null;
+        this.isConfirming = false;
         console.error('Error updating order status:', error);
         this.notificationService.showError('Lỗi!', 'Không thể cập nhật trạng thái đơn hàng');
       }
     });
+  }
+
+  cancelStatusUpdate(): void {
+    this.showConfirmModal = false;
+    this.confirmOrderId = null;
+    this.confirmNewStatus = null;
+    this.confirmMessage = '';
+    this.confirmTitle = '';
   }
 
   private getSortString(): string {

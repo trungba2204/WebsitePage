@@ -49,6 +49,11 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    // Discount code fields
+    private String discountCode;
+    private BigDecimal discountAmount = BigDecimal.ZERO;
+    private BigDecimal originalAmount;
+
     @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime orderDate;

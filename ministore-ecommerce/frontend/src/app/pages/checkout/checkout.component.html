@@ -114,6 +114,80 @@
                 </div>
               </div>
 
+              <!-- Discount Code -->
+              <div class="mb-3">
+                <label for="discountCode" class="form-label">Mã giảm giá</label>
+                <div class="input-group">
+                  <input 
+                    type="text" 
+                    class="form-control discount-input" 
+                    [class]="discountValidation?.isValid ? 'is-valid' : ''"
+                    id="discountCode"
+                    [(ngModel)]="discountCode" 
+                    name="discountCode"
+                    placeholder="Nhập mã giảm giá..."
+                    [disabled]="!!discountValidation?.isValid">
+                  <button 
+                    class="btn discount-apply-btn" 
+                    [class]="discountValidation?.isValid ? 'btn-success' : 'btn-outline-primary'"
+                    type="button"
+                    [disabled]="!discountCode.trim() || isApplyingDiscount"
+                    (click)="applyDiscountCode()">
+                    @if (isApplyingDiscount) {
+                      <span class="spinner-border spinner-border-sm me-1"></span>
+                      Đang kiểm tra...
+                    } @else if (discountValidation?.isValid) {
+                      <i class="bi bi-check-circle-fill me-1"></i>
+                      Đã áp dụng thành công!
+                    } @else {
+                      <i class="bi bi-ticket-perforated me-1"></i>
+                      Áp dụng mã giảm giá
+                    }
+                  </button>
+                </div>
+                @if (discountValidation?.isValid) {
+                  <div class="mt-2 discount-success-card">
+                    <div class="success-header">
+                      <div class="d-flex align-items-center">
+                        <div class="success-icon">
+                          <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="success-content">
+                          <h6 class="success-title mb-0">🎉 Áp dụng mã giảm giá thành công!</h6>
+                          <small class="success-subtitle">Mã {{ discountCode }} đã được áp dụng</small>
+                        </div>
+                        <button 
+                          class="btn btn-sm btn-outline-danger ms-auto"
+                          (click)="removeDiscountCode()"
+                          title="Xóa mã giảm giá">
+                          <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="success-message">
+                      <i class="bi bi-gift me-2"></i>
+                      {{ discountValidation?.message }}
+                    </div>
+                    <div class="success-amount">
+                      <span class="amount-label">Số tiền được giảm:</span>
+                      <span class="amount-value">{{ formatPrice(discountValidation?.discountAmount || 0) }}</span>
+                    </div>
+                  </div>
+                } @else if (discountValidation && !discountValidation.isValid) {
+                  <div class="mt-2 discount-error-card">
+                    <div class="d-flex align-items-center">
+                      <div class="error-icon">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                      </div>
+                      <div class="error-content">
+                        <h6 class="error-title mb-0">❌ Mã giảm giá không hợp lệ</h6>
+                        <small class="error-message">{{ discountValidation.message || '' }}</small>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+
               <!-- Note -->
               <div class="mb-3">
                 <label for="note" class="form-label">Ghi chú</label>
@@ -157,6 +231,31 @@
                 <span>{{ formatPrice(cart?.totalPrice || 0) }}</span>
               </div>
               
+              @if (discountValidation?.isValid) {
+                <div class="discount-info p-3 mb-3 bg-light rounded border border-success">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                      <i class="bi bi-ticket-perforated text-success me-2"></i>
+                      <span class="fw-bold text-success">Mã giảm giá: {{ discountCode }}</span>
+                    </div>
+                    <button 
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeDiscountCode()"
+                      title="Xóa mã giảm giá">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-muted">Giá trị giảm:</span>
+                    <span class="fw-bold text-success">-{{ formatPrice(discountValidation?.discountAmount || 0) }}</span>
+                  </div>
+                  <small class="text-muted d-block mt-1">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {{ discountValidation?.message }}
+                  </small>
+                </div>
+              }
+              
               <div class="d-flex justify-content-between mb-2">
                 <span>Phí vận chuyển:</span>
                 <span>{{ formatPrice(0) }}</span>
@@ -164,10 +263,25 @@
               
               <hr>
               
-              <div class="d-flex justify-content-between mb-3">
-                <strong>Tổng cộng:</strong>
-                <strong class="text-primary">{{ formatPrice(getTotalAmount()) }}</strong>
-              </div>
+              @if (discountValidation?.isValid) {
+                <div class="d-flex justify-content-between mb-2">
+                  <span>Tổng cộng (chưa giảm):</span>
+                  <span class="text-muted text-decoration-line-through">{{ formatPrice(cart?.totalPrice || 0) }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                  <strong>Tổng cộng (đã giảm giá):</strong>
+                  <strong class="text-success fs-5">{{ formatPrice(getTotalAmount()) }}</strong>
+                </div>
+                <div class="alert alert-success alert-sm mb-3">
+                  <i class="bi bi-gift me-1"></i>
+                  <strong>Bạn đã tiết kiệm được {{ formatPrice((cart?.totalPrice || 0) - getTotalAmount()) }}</strong>
+                </div>
+              } @else {
+                <div class="d-flex justify-content-between mb-3">
+                  <strong>Tổng cộng:</strong>
+                  <strong class="text-primary fs-5">{{ formatPrice(getTotalAmount()) }}</strong>
+                </div>
+              }
               
               <button 
                 type="button" 

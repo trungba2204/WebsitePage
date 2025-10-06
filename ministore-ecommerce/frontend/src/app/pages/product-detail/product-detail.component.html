@@ -29,7 +29,7 @@
           <div class="product-images">
             <!-- Main Image -->
             <div class="main-image">
-              <img [src]="product.imageUrl" [alt]="product.name" class="img-fluid" />
+              <img [src]="product.imageUrl" [alt]="product.name" class="img-fluid" appImageFallback />
               @if (product.stock === 0) {
                 <div class="out-of-stock-overlay">
                   <span>Hết hàng</span>
@@ -40,7 +40,7 @@
             <!-- Thumbnail Images (placeholder for future gallery) -->
             <div class="thumbnail-images">
               <div class="thumbnail active">
-                <img [src]="product.imageUrl" [alt]="product.name" />
+                <img [src]="product.imageUrl" [alt]="product.name" appImageFallback />
               </div>
               <!-- Add more thumbnails here when implementing image gallery -->
             </div>
@@ -146,9 +146,14 @@
                     }
                   </button>
                   
-                  <button class="btn btn-outline-primary btn-lg">
-                    <i class="bi bi-heart me-2"></i>
-                    Yêu thích
+                  <button 
+                    class="btn btn-lg"
+                    [class.btn-outline-primary]="!isFavorite"
+                    [class.btn-danger]="isFavorite"
+                    (click)="toggleFavorite()">
+                    <i class="bi me-2" 
+                       [ngClass]="isFavorite ? 'bi-heart-fill' : 'bi-heart'"></i>
+                    {{ isFavorite ? 'Đã yêu thích' : 'Yêu thích' }}
                   </button>
                 </div>
               </div>
@@ -175,31 +180,54 @@
 
       <!-- Product Tabs -->
       <div class="product-tabs mt-5">
-        <ul class="nav nav-tabs" id="productTabs" role="tablist">
+        <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+            <button 
+              class="nav-link" 
+              [class.active]="activeTab === 'description'"
+              (click)="setActiveTab('description')"
+              type="button" 
+              role="tab">
               Mô tả chi tiết
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications" type="button" role="tab">
+            <button 
+              class="nav-link" 
+              [class.active]="activeTab === 'specifications'"
+              (click)="setActiveTab('specifications')"
+              type="button" 
+              role="tab">
               Thông số kỹ thuật
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+            <button 
+              class="nav-link" 
+              [class.active]="activeTab === 'reviews'"
+              (click)="setActiveTab('reviews')"
+              type="button" 
+              role="tab">
               Đánh giá ({{ product.reviews || 0 }})
             </button>
           </li>
         </ul>
-        <div class="tab-content" id="productTabsContent">
-          <div class="tab-pane fade show active" id="description" role="tabpanel">
+        <div class="tab-content">
+          <div 
+            class="tab-pane" 
+            [class.active]="activeTab === 'description'"
+            [class.show]="activeTab === 'description'"
+            role="tabpanel">
             <div class="tab-content-body">
               <p>{{ product.description }}</p>
               <p>Đây là một sản phẩm chất lượng cao với thiết kế hiện đại và tính năng tiên tiến. Sản phẩm được sản xuất theo tiêu chuẩn quốc tế và đảm bảo chất lượng tốt nhất cho người dùng.</p>
             </div>
           </div>
-          <div class="tab-pane fade" id="specifications" role="tabpanel">
+          <div 
+            class="tab-pane" 
+            [class.active]="activeTab === 'specifications'"
+            [class.show]="activeTab === 'specifications'"
+            role="tabpanel">
             <div class="tab-content-body">
               <table class="table">
                 <tbody>
@@ -223,7 +251,11 @@
               </table>
             </div>
           </div>
-          <div class="tab-pane fade" id="reviews" role="tabpanel">
+          <div 
+            class="tab-pane" 
+            [class.active]="activeTab === 'reviews'"
+            [class.show]="activeTab === 'reviews'"
+            role="tabpanel">
             <div class="tab-content-body">
               <div class="reviews-summary">
                 <div class="average-rating">

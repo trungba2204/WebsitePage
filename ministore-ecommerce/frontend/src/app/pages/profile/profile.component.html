@@ -164,7 +164,28 @@
                       
                       <div class="order-footer">
                         <div class="order-total">
-                          <strong>Tổng: {{ formatPrice(order.totalAmount) }}</strong>
+                          @if (order.discountCode && order.discountAmount) {
+                            <div class="discount-badge mb-2">
+                              <span class="badge bg-success">
+                                <i class="bi bi-ticket-perforated me-1"></i>
+                                {{ order.discountCode }}
+                              </span>
+                              <small class="text-success ms-2">
+                                <i class="bi bi-gift me-1"></i>
+                                Tiết kiệm {{ formatPrice(order.discountAmount) }}
+                              </small>
+                            </div>
+                          }
+                          <div class="total-amount">
+                            <strong class="{{ order.discountCode ? 'text-success' : 'text-primary' }}">
+                              Tổng: {{ formatPrice(order.totalAmount) }}
+                            </strong>
+                            @if (order.discountCode && order.discountAmount) {
+                              <small class="text-muted d-block text-decoration-line-through">
+                                Giá gốc: {{ formatPrice(order.originalAmount || order.totalAmount) }}
+                              </small>
+                            }
+                          </div>
                         </div>
                         <div class="order-actions">
                           <a [routerLink]="['/orders', order.id]" class="btn btn-outline-primary btn-sm">

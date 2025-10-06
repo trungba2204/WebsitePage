@@ -1,230 +1,305 @@
 <div class="blogs-page">
-  <div class="container">
-    <!-- Header Section -->
-    <div class="blog-header text-center py-5">
-      <h1 class="display-4 fw-bold text-primary mb-3">Blog & Tin Tức</h1>
-      <p class="lead text-muted">Khám phá những bài viết mới nhất về công nghệ, xu hướng và mẹo hay</p>
-    </div>
-
-    <!-- Search and Filter -->
-    <div class="blog-filters mb-5">
-      <div class="row align-items-center">
-        <div class="col-md-6">
-          <div class="search-box">
-            <div class="input-group">
-              <input 
-                type="text" 
-                class="form-control" 
-                placeholder="Tìm kiếm bài viết..."
-                [(ngModel)]="searchQuery"
-                (keyup.enter)="onSearch()">
-              <button class="btn btn-primary" (click)="onSearch()">
-                <i class="bi bi-search"></i>
-              </button>
+  <div class="container-fluid px-0">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 class="hero-title">📚 Blog & Tin Tức</h1>
+          <p class="hero-subtitle">Khám phá những bài viết mới nhất về công nghệ, xu hướng và mẹo hay từ các chuyên gia</p>
+          <div class="hero-stats">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-file-text"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number">{{ totalBlogs }}</span>
+                <span class="stat-label">Bài viết</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-tags"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number">{{ categories.length }}</span>
+                <span class="stat-label">Chuyên mục</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="bi bi-people"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number">1.2K</span>
+                <span class="stat-label">Độc giả</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="filter-controls d-flex gap-3">
-            <select class="form-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange(selectedCategory)">
-              <option value="">Tất cả danh mục</option>
-              @for (category of categories; track category.id) {
-                <option [value]="category.slug">{{ category.name }}</option>
-              }
-            </select>
-            <button class="btn btn-outline-secondary" (click)="clearFilters()">
-              <i class="bi bi-x-circle"></i> Xóa bộ lọc
-            </button>
+        <div class="hero-image">
+          <div class="floating-elements">
+            <div class="floating-icon icon-1">📝</div>
+            <div class="floating-icon icon-2">💡</div>
+            <div class="floating-icon icon-3">🚀</div>
+            <div class="floating-icon icon-4">⭐</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="row">
-      <!-- Main Content -->
-      <div class="col-lg-8">
-        <!-- Loading State -->
-        @if (isLoading) {
-          <div class="text-center py-5">
-            <div class="spinner-border text-primary" role="status">
-              <span class="visually-hidden">Đang tải...</span>
+    <!-- Search and Filter Section -->
+    <div class="search-filter-section">
+      <div class="container">
+        <div class="search-filter-card">
+          <div class="row align-items-center">
+            <div class="col-lg-6 mb-3 mb-lg-0">
+              <div class="search-container">
+                <div class="search-input-wrapper">
+                  <i class="bi bi-search search-icon"></i>
+                  <input 
+                    type="text" 
+                    class="search-input" 
+                    placeholder="Tìm kiếm bài viết, tác giả, hoặc chủ đề..."
+                    [(ngModel)]="searchQuery"
+                    (keyup.enter)="onSearch()">
+                  <button class="search-btn" (click)="onSearch()">
+                    <i class="bi bi-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
             </div>
-            <p class="mt-3">Đang tải bài viết...</p>
+            <div class="col-lg-6">
+              <div class="filter-container">
+                <div class="filter-row">
+                  <select class="filter-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange(selectedCategory)">
+                    <option value="">🎯 Tất cả chuyên mục</option>
+                    @for (category of categories; track category.id) {
+                      <option [value]="category.slug">{{ category.name }}</option>
+                    }
+                  </select>
+                  <button class="filter-clear-btn" (click)="clearFilters()" title="Xóa bộ lọc">
+                    <i class="bi bi-x-circle"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-        } @else {
-          <!-- Blog Grid -->
-          @if (blogs.length > 0) {
-            <div class="row">
-              @for (blog of blogs; track blog.id) {
-                <div class="col-md-6 mb-4">
-                  <article class="blog-card card h-100 shadow-sm">
-                    <div class="blog-image">
-                      <img [src]="blog.imageUrl" [alt]="blog.title" class="card-img-top">
-                      <div class="blog-category-badge">
-                        <span class="badge bg-primary">{{ blog.category }}</span>
-                      </div>
-                    </div>
-                    
-                    <div class="card-body d-flex flex-column">
-                      <div class="blog-meta mb-2">
-                        <small class="text-muted">
-                          <i class="bi bi-calendar3 me-1"></i>
-                          {{ formatDate(blog.publishDate) }}
-                        </small>
-                        <small class="text-muted ms-3">
-                          <i class="bi bi-person me-1"></i>
-                          {{ blog.author }}
-                        </small>
-                      </div>
-                      
-                      <h3 class="blog-title card-title">
-                        <a [routerLink]="['/blogs', blog.slug]" class="text-decoration-none">
-                          {{ blog.title }}
-                        </a>
-                      </h3>
-                      
-                      <p class="blog-excerpt card-text text-muted flex-grow-1">
-                        {{ blog.excerpt }}
-                      </p>
-                      
-                      <div class="blog-stats d-flex justify-content-between align-items-center mt-auto">
-                        <div class="blog-stats-left">
-                          <small class="text-muted">
-                            <i class="bi bi-eye me-1"></i>
-                            {{ blog.views }} lượt xem
-                          </small>
-                          <small class="text-muted ms-3">
-                            <i class="bi bi-heart me-1"></i>
-                            {{ blog.likes }} thích
-                          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <div class="container">
+        <div class="row">
+          <!-- Blog Posts -->
+          <div class="col-lg-8">
+            <!-- Loading State -->
+            @if (isLoading) {
+              <div class="loading-container">
+                <div class="loading-spinner">
+                  <div class="spinner"></div>
+                </div>
+                <p class="loading-text">Đang tải những bài viết hay nhất...</p>
+              </div>
+            } @else {
+              <!-- Blog Grid -->
+              @if (blogs.length > 0) {
+                <div class="blog-grid">
+                  @for (blog of blogs; track blog.id) {
+                    <article class="blog-card">
+                      <div class="blog-image-container">
+                        <img [src]="blog.imageUrl" [alt]="blog.title" class="blog-image">
+                        <div class="blog-overlay">
+                          <div class="overlay-content">
+                            <button class="read-btn" [routerLink]="['/blogs', blog.slug]">
+                              <i class="bi bi-arrow-right"></i>
+                              <span>Đọc ngay</span>
+                            </button>
+                          </div>
                         </div>
-                        <a [routerLink]="['/blogs', blog.slug]" class="btn btn-outline-primary btn-sm">
-                          Đọc tiếp <i class="bi bi-arrow-right ms-1"></i>
-                        </a>
+                        <div class="blog-category">
+                          <span class="category-badge">{{ blog.category }}</span>
+                        </div>
+                        <div class="blog-date">
+                          <span class="date-badge">{{ formatDate(blog.publishDate) }}</span>
+                        </div>
                       </div>
-                    </div>
-                  </article>
+                      
+                      <div class="blog-content">
+                        <div class="blog-meta">
+                          <div class="meta-item">
+                            <i class="bi bi-person-circle"></i>
+                            <span>{{ blog.author }}</span>
+                          </div>
+                          <div class="meta-item">
+                            <i class="bi bi-eye"></i>
+                            <span>{{ blog.views }}</span>
+                          </div>
+                          <div class="meta-item">
+                            <i class="bi bi-heart"></i>
+                            <span>{{ blog.likes }}</span>
+                          </div>
+                        </div>
+                        
+                        <h2 class="blog-title">
+                          <a [routerLink]="['/blogs', blog.slug]" class="title-link">
+                            {{ blog.title }}
+                          </a>
+                        </h2>
+                        
+                        <p class="blog-excerpt">{{ blog.excerpt }}</p>
+                        
+                        <div class="blog-footer">
+                          <div class="blog-tags">
+                            <span class="tag">#{{ blog.category.toLowerCase() }}</span>
+                            <span class="tag">#blog</span>
+                          </div>
+                          <a [routerLink]="['/blogs', blog.slug]" class="read-more-link">
+                            Đọc tiếp <i class="bi bi-arrow-right"></i>
+                          </a>
+                        </div>
+                      </div>
+                    </article>
+                  }
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination-container">
+                  <nav class="pagination-nav">
+                    <ul class="pagination">
+                      <li class="page-item" [class.disabled]="currentPage === 0">
+                        <button class="page-link" (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">
+                          <i class="bi bi-chevron-left"></i>
+                        </button>
+                      </li>
+                      @for (page of getPageNumbers(); track page) {
+                        <li class="page-item" [class.active]="page === currentPage + 1">
+                          <button class="page-link" (click)="goToPage(page - 1)">{{ page }}</button>
+                        </li>
+                      }
+                      <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
+                        <button class="page-link" (click)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
+                          <i class="bi bi-chevron-right"></i>
+                        </button>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              } @else {
+                <div class="empty-state">
+                  <div class="empty-icon">📝</div>
+                  <h3>Không tìm thấy bài viết nào</h3>
+                  <p>Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả bài viết</p>
+                  <button class="btn btn-primary" (click)="clearFilters()">
+                    <i class="bi bi-arrow-clockwise"></i> Xem tất cả
+                  </button>
                 </div>
               }
-            </div>
-
-            <!-- Pagination -->
-            @if (totalPages > 1) {
-              <nav class="mt-5">
-                <ul class="pagination justify-content-center">
-                  <li class="page-item" [class.disabled]="currentPage === 0">
-                    <button class="page-link" (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 0">
-                      <i class="bi bi-chevron-left"></i>
-                    </button>
-                  </li>
-                  
-                  @for (page of pages; track page) {
-                    <li class="page-item" [class.active]="page === currentPage">
-                      <button class="page-link" (click)="onPageChange(page)">{{ page + 1 }}</button>
-                    </li>
-                  }
-                  
-                  <li class="page-item" [class.disabled]="currentPage === totalPages - 1">
-                    <button class="page-link" (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === totalPages - 1">
-                      <i class="bi bi-chevron-right"></i>
-                    </button>
-                  </li>
-                </ul>
-              </nav>
             }
-          } @else {
-            <div class="empty-state text-center py-5">
-              <i class="bi bi-journal-text text-muted" style="font-size: 4rem;"></i>
-              <h3 class="mt-3">Không tìm thấy bài viết</h3>
-              <p class="text-muted">Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả bài viết.</p>
-              <button class="btn btn-primary" (click)="clearFilters()">
-                Xem tất cả bài viết
-              </button>
-            </div>
-          }
-        }
-      </div>
+          </div>
 
-      <!-- Sidebar -->
-      <div class="col-lg-4">
-        <div class="blog-sidebar">
-          <!-- Recent Posts -->
-          @if (recentBlogs.length > 0) {
-            <div class="sidebar-widget mb-4">
-              <h4 class="widget-title">Bài viết gần đây</h4>
-              <div class="recent-posts">
-                @for (blog of recentBlogs; track blog.id) {
-                  <div class="recent-post-item d-flex mb-3">
-                    <img [src]="blog.imageUrl" [alt]="blog.title" class="recent-post-image">
-                    <div class="recent-post-content flex-grow-1 ms-3">
-                      <h6 class="recent-post-title">
-                        <a [routerLink]="['/blogs', blog.slug]" class="text-decoration-none">
-                          {{ blog.title }}
-                        </a>
-                      </h6>
-                      <small class="text-muted">{{ formatDate(blog.publishDate) }}</small>
-                    </div>
+          <!-- Sidebar -->
+          <div class="col-lg-4">
+            <div class="sidebar">
+              <!-- Categories Widget -->
+              <div class="widget">
+                <div class="widget-header">
+                  <h3 class="widget-title">
+                    <i class="bi bi-folder2-open"></i>
+                    Chuyên mục
+                  </h3>
+                </div>
+                <div class="widget-content">
+                  <div class="category-list">
+                    @for (category of categories; track category.id) {
+                      <a 
+                        class="category-item" 
+                        [class.active]="selectedCategory === category.slug"
+                        (click)="onCategoryChange(category.slug)">
+                        <span class="category-name">{{ category.name }}</span>
+                        <span class="category-count">{{ getCategoryCount(category.slug) }}</span>
+                      </a>
+                    }
                   </div>
-                }
+                </div>
               </div>
-            </div>
-          }
 
-          <!-- Popular Posts -->
-          @if (popularBlogs.length > 0) {
-            <div class="sidebar-widget mb-4">
-              <h4 class="widget-title">Bài viết phổ biến</h4>
-              <div class="popular-posts">
-                @for (blog of popularBlogs; track blog.id) {
-                  <div class="popular-post-item d-flex align-items-center mb-3">
-                    <div class="popular-post-rank me-3">
-                      <span class="badge bg-primary rounded-circle">{{ $index + 1 }}</span>
-                    </div>
-                    <div class="popular-post-content flex-grow-1">
-                      <h6 class="popular-post-title">
-                        <a [routerLink]="['/blogs', blog.slug]" class="text-decoration-none">
-                          {{ blog.title }}
-                        </a>
-                      </h6>
-                      <small class="text-muted">
-                        <i class="bi bi-eye me-1"></i>{{ blog.views }}
-                      </small>
-                    </div>
+              <!-- Recent Posts Widget -->
+              <div class="widget">
+                <div class="widget-header">
+                  <h3 class="widget-title">
+                    <i class="bi bi-clock-history"></i>
+                    Bài viết gần đây
+                  </h3>
+                </div>
+                <div class="widget-content">
+                  <div class="recent-posts">
+                    @for (blog of recentBlogs; track blog.id) {
+                      <div class="recent-post-item">
+                        <div class="recent-post-image">
+                          <img [src]="blog.imageUrl" [alt]="blog.title">
+                        </div>
+                        <div class="recent-post-content">
+                          <h4 class="recent-post-title">
+                            <a [routerLink]="['/blogs', blog.slug]">{{ blog.title }}</a>
+                          </h4>
+                          <div class="recent-post-meta">
+                            <span class="recent-post-date">{{ formatDate(blog.publishDate) }}</span>
+                            <span class="recent-post-views">{{ blog.views }} lượt xem</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
                   </div>
-                }
+                </div>
               </div>
-            </div>
-          }
 
-          <!-- Categories -->
-          @if (categories.length > 0) {
-            <div class="sidebar-widget mb-4">
-              <h4 class="widget-title">Danh mục</h4>
-              <div class="category-list">
-                <a href="#" class="category-item d-flex justify-content-between align-items-center mb-2" (click)="onCategoryChange(''); $event.preventDefault()">
-                  <span>Tất cả</span>
-                  <span class="badge bg-secondary">-</span>
-                </a>
-                @for (category of categories; track category.id) {
-                  <a href="#" class="category-item d-flex justify-content-between align-items-center mb-2" (click)="onCategoryChange(category.slug); $event.preventDefault()">
-                    <span>{{ category.name }}</span>
-                    <span class="badge bg-secondary">-</span>
-                  </a>
-                }
+              <!-- Popular Posts Widget -->
+              <div class="widget">
+                <div class="widget-header">
+                  <h3 class="widget-title">
+                    <i class="bi bi-fire"></i>
+                    Bài viết nổi bật
+                  </h3>
+                </div>
+                <div class="widget-content">
+                  <div class="popular-posts">
+                    @for (blog of popularBlogs; track blog.id; let i = $index) {
+                      <div class="popular-post-item">
+                        <div class="popular-rank">{{ i + 1 }}</div>
+                        <div class="popular-content">
+                          <h4 class="popular-title">
+                            <a [routerLink]="['/blogs', blog.slug]">{{ blog.title }}</a>
+                          </h4>
+                          <div class="popular-stats">
+                            <span class="popular-views">{{ blog.views }} lượt xem</span>
+                            <span class="popular-likes">{{ blog.likes }} lượt thích</span>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
               </div>
-            </div>
-          }
 
-          <!-- Newsletter -->
-          <div class="sidebar-widget">
-            <h4 class="widget-title">Đăng ký nhận tin</h4>
-            <div class="newsletter-form">
-              <p class="text-muted small mb-3">Nhận những bài viết mới nhất qua email</p>
-              <div class="input-group">
-                <input type="email" class="form-control" placeholder="Email của bạn">
-                <button class="btn btn-primary" type="button">
-                  <i class="bi bi-send"></i>
-                </button>
+              <!-- Newsletter Widget -->
+              <div class="widget newsletter-widget">
+                <div class="widget-header">
+                  <h3 class="widget-title">
+                    <i class="bi bi-envelope-heart"></i>
+                    Nhận tin mới
+                  </h3>
+                </div>
+                <div class="widget-content">
+                  <p class="newsletter-text">Đăng ký để nhận những bài viết hay nhất hàng tuần!</p>
+                  <div class="newsletter-form">
+                    <input type="email" class="newsletter-input" placeholder="Email của bạn...">
+                    <button class="newsletter-btn">
+                      <i class="bi bi-send"></i>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

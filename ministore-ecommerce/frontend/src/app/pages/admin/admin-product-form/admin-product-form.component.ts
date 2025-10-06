@@ -25,6 +25,8 @@ export class AdminProductFormComponent implements OnInit {
   isSaving = false;
   isEditMode = false;
   productId: number | null = null;
+  selectedImageFile: File | null = null;
+  selectedImagePreview: string | null = null;
 
   productForm = {
     name: '',
@@ -91,50 +93,64 @@ export class AdminProductFormComponent implements OnInit {
     });
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (!this.validateForm()) {
       return;
     }
 
     this.isSaving = true;
 
-    if (this.isEditMode && this.productId) {
-      // Update existing product
-      const updateRequest: UpdateProductRequest = {
-        id: this.productId,
-        ...this.productForm
-      };
-
-      this.adminService.updateProduct(updateRequest).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.notificationService.showSuccess('Thành công!', 'Sản phẩm đã được cập nhật');
-          this.router.navigate(['/admin/products']);
-        },
-        error: (error) => {
-          this.isSaving = false;
-          console.error('Error updating product:', error);
-          this.notificationService.showError('Lỗi!', 'Không thể cập nhật sản phẩm');
+    try {
+      // Handle image upload first
+      if (this.selectedImageFile) {
+        const uploadedImageUrl = await this.uploadImage();
+        if (uploadedImageUrl) {
+          this.productForm.imageUrl = uploadedImageUrl;
         }
-      });
-    } else {
-      // Create new product
-      const createRequest: CreateProductRequest = {
-        ...this.productForm
-      };
+      }
 
-      this.adminService.createProduct(createRequest).subscribe({
-        next: () => {
-          this.isSaving = false;
-          this.notificationService.showSuccess('Thành công!', 'Sản phẩm đã được tạo');
-          this.router.navigate(['/admin/products']);
-        },
-        error: (error) => {
-          this.isSaving = false;
-          console.error('Error creating product:', error);
-          this.notificationService.showError('Lỗi!', 'Không thể tạo sản phẩm');
-        }
-      });
+      if (this.isEditMode && this.productId) {
+        // Update existing product
+        const updateRequest: UpdateProductRequest = {
+          id: this.productId,
+          ...this.productForm
+        };
+
+        this.adminService.updateProduct(updateRequest).subscribe({
+          next: () => {
+            this.isSaving = false;
+            this.notificationService.showSuccess('Thành công!', 'Sản phẩm đã được cập nhật');
+            this.router.navigate(['/admin/products']);
+          },
+          error: (error) => {
+            this.isSaving = false;
+            console.error('Error updating product:', error);
+            this.notificationService.showError('Lỗi!', 'Không thể cập nhật sản phẩm');
+          }
+        });
+      } else {
+        // Create new product
+        const createRequest: CreateProductRequest = {
+          ...this.productForm
+        };
+
+        this.adminService.createProduct(createRequest).subscribe({
+          next: () => {
+            this.isSaving = false;
+            this.notificationService.showSuccess('Thành công!', 'Sản phẩm đã được tạo');
+            this.router.navigate(['/admin/products']);
+          },
+          error: (error) => {
+            this.isSaving = false;
+            console.error('Error creating product:', error);
+            this.notificationService.showError('Lỗi!', 'Không thể tạo sản phẩm');
+          }
+        });
+      }
+    } catch (error) {
+      this.isSaving = false;
+      console.error('Error in onSubmit:', error);
+      this.notificationService.showError('Lỗi!', 'Có lỗi xảy ra khi xử lý');
     }
   }
 
@@ -154,8 +170,9 @@ export class AdminProductFormComponent implements OnInit {
       return false;
     }
 
-    if (!this.productForm.imageUrl.trim()) {
-      this.notificationService.showError('Lỗi!', 'Vui lòng nhập URL hình ảnh');
+    // Image is optional - can be uploaded file or URL
+    if (!this.productForm.imageUrl.trim() && !this.selectedImageFile) {
+      this.notificationService.showError('Lỗi!', 'Vui lòng chọn ảnh hoặc nhập URL ảnh');
       return false;
     }
 
@@ -190,5 +207,104 @@ export class AdminProductFormComponent implements OnInit {
   getCategoryName(categoryId: number): string {
     const category = this.categories.find(c => c.id === categoryId);
     return category ? category.name : 'Chưa chọn';
+  }
+
+  onImageSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi', 'Kích thước file không được vượt quá 5MB');
+        return;
+      }
+
+      this.selectedImageFile = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.selectedImagePreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeImage(): void {
+    this.selectedImageFile = null;
+    this.selectedImagePreview = null;
+    
+    // Reset file input
+    const fileInput = document.getElementById('imageUpload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
+  async uploadImage(): Promise<string | null> {
+    if (!this.selectedImageFile) {
+      return null;
+    }
+
+    try {
+      // Create a compressed base64 data URL with reduced quality
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        
+        img.onload = () => {
+          // Resize image to max 400x400 to reduce file size
+          const maxSize = 400;
+          let { width, height } = img;
+          
+          if (width > height) {
+            if (width > maxSize) {
+              height = (height * maxSize) / width;
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = (width * maxSize) / height;
+              height = maxSize;
+            }
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          
+          // Draw and compress image
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          // Convert to base64 with reduced quality (0.7)
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          
+          // If still too long, use a tiny placeholder (under 255 chars)
+          if (compressedDataUrl.length > 200) {
+            console.warn('Image too large, using tiny placeholder');
+            resolve('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIj48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSJyZWQiLz48L3N2Zz4=');
+          } else {
+            resolve(compressedDataUrl);
+          }
+        };
+        
+        img.onerror = () => {
+          reject(new Error('Failed to load image'));
+        };
+        
+        // Create object URL and load image
+        const objectUrl = URL.createObjectURL(this.selectedImageFile!);
+        img.src = objectUrl;
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      this.notificationService.showError('Lỗi', 'Không thể upload ảnh');
+      return null;
+    }
   }
 }

@@ -40,19 +40,30 @@ export class AdminAuthService {
     const token = localStorage.getItem('admin_token');
     const user = localStorage.getItem('admin_user');
     
+    console.log('🔍 AdminAuthService initializeAuth - Token exists:', !!token);
+    console.log('🔍 AdminAuthService initializeAuth - User data exists:', !!user);
+    
     if (token && user) {
       try {
         const parsedUser = JSON.parse(user) as User;
+        console.log('🔍 AdminAuthService initializeAuth - Parsed user:', parsedUser);
+        console.log('🔍 AdminAuthService initializeAuth - User role:', parsedUser.role);
+        
         // Only set as authenticated if user has ADMIN role
         if (parsedUser.role === 'ADMIN') {
           this.adminUserSignal.set(parsedUser);
           this.isAuthenticatedSignal.set(true);
+          console.log('✅ AdminAuthService initializeAuth - Admin authenticated successfully');
         } else {
+          console.log('❌ AdminAuthService initializeAuth - User role is not ADMIN:', parsedUser.role);
           this.clearAuth();
         }
       } catch (error) {
+        console.log('❌ AdminAuthService initializeAuth - Error parsing user data:', error);
         this.clearAuth();
       }
+    } else {
+      console.log('🔍 AdminAuthService initializeAuth - No token or user data found');
     }
   }
 
@@ -80,16 +91,21 @@ export class AdminAuthService {
   }
 
   logout(): void {
+    console.log('🔍 AdminAuthService logout - Starting logout process');
     this.clearAuth();
+    console.log('🔍 AdminAuthService logout - Auth cleared, navigating to login');
     this.router.navigate(['/admin/login']);
+    console.log('🔍 AdminAuthService logout - Navigation triggered');
   }
 
   private clearAuth(): void {
+    console.log('🔍 AdminAuthService clearAuth - Removing admin token and user data');
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
     
     this.adminUserSignal.set(null);
     this.isAuthenticatedSignal.set(false);
+    console.log('🔍 AdminAuthService clearAuth - Auth signals cleared');
   }
 
   getToken(): string | null {
@@ -125,5 +141,10 @@ export class AdminAuthService {
           this.adminUserSignal.set(updatedUser);
         })
       );
+  }
+
+  updateAdminAvatar(updatedUser: User): void {
+    localStorage.setItem('admin_user', JSON.stringify(updatedUser));
+    this.adminUserSignal.set(updatedUser);
   }
 }

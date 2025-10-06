@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Orders</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .order { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+        .discount { background: #d4edda; border-color: #28a745; }
+        .no-discount { background: #f8f9fa; }
+        .debug { background: #fff3cd; border-color: #ffc107; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Orders & Discount Codes</h1>
+    
+    <div class="debug">
+        <h3>Test Actions:</h3>
+        <button onclick="testLogin()">1. Test Login</button>
+        <button onclick="testOrders()">2. Get Orders</button>
+        <button onclick="testDiscountValidation()">3. Test Discount</button>
+        <button onclick="testCreateOrder()">4. Create Order with Discount</button>
+        <button onclick="clearResults()">Clear</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        let authToken = '';
+        const API_URL = 'http://localhost:8080/api';
+        
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `order ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            log('🔐 Testing login...', 'debug');
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'user@test.com',
+                        password: 'password123'
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.token) {
+                    authToken = data.token;
+                    log(`✅ Login successful! Token: ${data.token.substring(0, 20)}...`, 'discount');
+                } else {
+                    log(`❌ Login failed: ${JSON.stringify(data)}`, 'no-discount');
+                }
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'no-discount');
+            }
+        }
+        
+        async function testOrders() {
+            log('📋 Getting orders...', 'debug');
+            if (!authToken) {
+                log('❌ No auth token. Please login first.', 'no-discount');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/orders`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                const orders = await response.json();
+                log(`📦 Found ${orders.length} orders`, 'discount');
+                
+                orders.forEach((order, index) => {
+                    const hasDiscount = order.discountCode && order.discountAmount;
+                    log(`Order #${order.orderNumber}: ${hasDiscount ? 'HAS DISCOUNT' : 'NO DISCOUNT'} - ${JSON.stringify({
+                        totalAmount: order.totalAmount,
+                        originalAmount: order.originalAmount,
+                        discountCode: order.discountCode,
+                        discountAmount: order.discountAmount
+                    })}`, hasDiscount ? 'discount' : 'no-discount');
+                });
+            } catch (error) {
+                log(`❌ Orders error: ${error.message}`, 'no-discount');
+            }
+        }
+        
+        async function testDiscountValidation() {
+            log('🎫 Testing discount validation...', 'debug');
+            try {
+                const response = await fetch(`${API_URL}/discount-codes/validate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: 'WELCOME10',
+                        orderAmount: 200000
+                    })
+                });
+                
+                const data = await response.json();
+                log(`✅ Discount validation: ${JSON.stringify(data)}`, 'discount');
+            } catch (error) {
+                log(`❌ Discount validation error: ${error.message}`, 'no-discount');
+            }
+        }
+        
+        async function testCreateOrder() {
+            log('🛒 Creating order with discount...', 'debug');
+            if (!authToken) {
+                log('❌ No auth token. Please login first.', 'no-discount');
+                return;
+            }
+            
+            try {
+                const orderData = {
+                    shippingAddress: {
+                        fullName: 'Test User',
+                        phone: '0123456789',
+                        address: '123 Test Street',
+                        city: 'Ho Chi Minh'
+                    },
+                    paymentMethod: 'cod',
+                    note: 'Test order with discount',
+                    discountCode: 'WELCOME10',
+                    discountAmount: 20000
+                };
+                
+                const response = await fetch(`${API_URL}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                const order = await response.json();
+                log(`✅ Order created: ${JSON.stringify(order)}`, 'discount');
+            } catch (error) {
+                log(`❌ Create order error: ${error.message}`, 'no-discount');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+<div class="admin-team">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="page-title">Quản lý đội ngũ</h1>
+        <p class="page-subtitle">Quản lý thông tin thành viên trong đội ngũ</p>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="showAddForm()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm thành viên
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Members Table -->
+  <div class="team-table-container">
+    @if (isLoading) {
+      <div class="loading-state">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Đang tải...</span>
+        </div>
+        <p class="mt-3">Đang tải danh sách thành viên...</p>
+      </div>
+    } @else if (teamMembers.length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">
+          <i class="bi bi-people"></i>
+        </div>
+        <h3>Chưa có thành viên nào</h3>
+        <p>Chưa có thành viên nào trong đội ngũ.</p>
+        <button class="btn btn-primary" (click)="showAddForm()">
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm thành viên đầu tiên
+        </button>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="table-light">
+            <tr>
+              <th width="120">Ảnh đại diện</th>
+              <th>Tên thành viên</th>
+              <th>Vị trí</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+              <th width="120">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (member of teamMembers; track member.id) {
+              <tr>
+                <td>
+                  <div class="member-image">
+                    <img [src]="member.image" [alt]="member.name" class="img-fluid rounded-circle">
+                  </div>
+                </td>
+                <td>
+                  <div class="member-info">
+                    <h6 class="member-name">{{ member.name }}</h6>
+                    <small class="text-muted">{{ truncateText(member.bio, 80) }}</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="badge bg-primary">{{ member.position }}</span>
+                </td>
+                <td>
+                  <span [class]="'badge ' + getStatusBadgeClass(member.isActive)">
+                    {{ getStatusText(member.isActive) }}
+                  </span>
+                </td>
+                <td>
+                  <span class="date">{{ formatDate(member.createdAt) }}</span>
+                </td>
+                <td>
+                  <div class="action-buttons">
+                    <button 
+                      class="btn btn-outline-primary btn-sm" 
+                      (click)="showEditForm(member)"
+                      title="Sửa">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button 
+                      class="btn btn-outline-danger btn-sm" 
+                      (click)="deleteMember(member)"
+                      [disabled]="isDeleting && deletingMemberId === member.id"
+                      title="Xóa">
+                      @if (isDeleting && deletingMemberId === member.id) {
+                        <span class="spinner-border spinner-border-sm"></span>
+                      } @else {
+                        <i class="bi bi-trash"></i>
+                      }
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <!-- Add/Edit Form Modal -->
+  @if (showForm) {
+    <div class="modal-overlay" (click)="cancelForm()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            {{ editingMember ? 'Sửa thành viên' : 'Thêm thành viên mới' }}
+          </h5>
+          <button type="button" class="btn-close" (click)="cancelForm()"></button>
+        </div>
+        
+        <div class="modal-body">
+          <form>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label class="form-label">Tên thành viên *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="formData.name"
+                    name="name"
+                    placeholder="Nhập tên thành viên"
+                    required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group mb-3">
+                  <label class="form-label">Vị trí *</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="formData.position"
+                    name="position"
+                    placeholder="Nhập vị trí"
+                    required>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">Ảnh đại diện *</label>
+              
+              <!-- File Upload -->
+              <div class="upload-section mb-3">
+                <div class="upload-area" [class.uploading]="isUploadingImage">
+                  <input
+                    type="file"
+                    id="imageFile"
+                    class="file-input"
+                    accept="image/*"
+                    (change)="onImageFileSelected($event)"
+                    [disabled]="isUploadingImage">
+                  <label for="imageFile" class="upload-label">
+                    @if (isUploadingImage) {
+                      <div class="upload-loading">
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Đang tải lên...
+                      </div>
+                    } @else {
+                      <div class="upload-content">
+                        <i class="bi bi-cloud-upload fs-1 text-primary"></i>
+                        <p class="mb-0">Chọn ảnh từ máy tính</p>
+                        <small class="text-muted">JPG, PNG, GIF, WEBP tối đa 5MB (không hỗ trợ HEIC)</small>
+                      </div>
+                    }
+                  </label>
+                </div>
+              </div>
+
+              <!-- URL Input (Alternative) -->
+              <div class="form-text mb-2">
+                <small class="text-muted">Hoặc nhập URL ảnh:</small>
+              </div>
+              <input
+                type="url"
+                class="form-control"
+                [(ngModel)]="formData.image"
+                name="image"
+                placeholder="https://example.com/image.jpg">
+              
+              @if (formData.image) {
+                <div class="mt-2">
+                  <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeImage()">
+                    <i class="bi bi-trash me-1"></i>
+                    Xóa ảnh
+                  </button>
+                </div>
+              }
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">Mô tả *</label>
+              <textarea
+                class="form-control"
+                [(ngModel)]="formData.bio"
+                name="bio"
+                rows="4"
+                placeholder="Nhập mô tả về thành viên"
+                required></textarea>
+            </div>
+
+            <div class="form-group mb-3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="isActive"
+                  [(ngModel)]="formData.isActive"
+                  name="isActive">
+                <label class="form-check-label" for="isActive">
+                  Hiển thị trên trang giới thiệu
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="cancelForm()">
+            Hủy
+          </button>
+          <button type="button" class="btn btn-primary" (click)="saveMember()">
+            {{ editingMember ? 'Cập nhật' : 'Thêm mới' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

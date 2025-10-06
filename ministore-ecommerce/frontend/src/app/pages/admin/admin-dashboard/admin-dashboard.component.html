@@ -123,7 +123,31 @@
                       </a>
                     </td>
                     <td>{{ order.shippingAddress.fullName || 'Khách hàng ẩn danh' }}</td>
-                    <td>{{ formatPrice(order.totalAmount) }}</td>
+                    <td>
+                      @if (order.discountCode && order.discountAmount) {
+                        <div class="dashboard-order-total">
+                          <div class="discount-badge mb-1">
+                            <span class="badge bg-success">
+                              <i class="bi bi-ticket-perforated me-1"></i>
+                              {{ order.discountCode }}
+                            </span>
+                            <small class="text-success ms-1">
+                              -{{ formatPrice(order.discountAmount) }}
+                            </small>
+                          </div>
+                          <div class="amount-display">
+                            <small class="text-muted text-decoration-line-through">
+                              {{ formatPrice(order.originalAmount || order.totalAmount) }}
+                            </small>
+                            <strong class="text-success ms-2">
+                              {{ formatPrice(order.totalAmount) }}
+                            </strong>
+                          </div>
+                        </div>
+                      } @else {
+                        <strong>{{ formatPrice(order.totalAmount) }}</strong>
+                      }
+                    </td>
                     <td>
                       <span class="badge" [ngClass]="getStatusClass(order.status)">
                         {{ getStatusText(order.status) }}

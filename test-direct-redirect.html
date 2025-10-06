@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Direct Redirect</title>
+</head>
+<body>
+    <h1>Test Direct Redirect</h1>
+    <button onclick="testDirectRedirect()">Test Direct Redirect</button>
+    <button onclick="simulateLogin()">Simulate Login</button>
+    <div id="result"></div>
+
+    <script>
+        function testDirectRedirect() {
+            console.log('Testing direct redirect...');
+            document.getElementById('result').innerHTML = `
+                🔄 Redirecting to admin dashboard...<br>
+                <br>
+                <strong>Direct links:</strong><br>
+                <a href="http://localhost:4200/admin/dashboard" target="_blank">Dashboard</a><br>
+                <a href="http://localhost:4200/admin" target="_blank">Admin Root</a><br>
+                <a href="http://localhost:4200/admin/login" target="_blank">Admin Login</a>
+            `;
+            
+            // Test direct redirect
+            setTimeout(() => {
+                console.log('Redirecting to dashboard...');
+                window.location.href = 'http://localhost:4200/admin/dashboard';
+            }, 1000);
+        }
+        
+        function simulateLogin() {
+            // Simulate successful login
+            const mockUser = {
+                id: 1,
+                email: 'admin@ministore.com',
+                firstName: 'Admin',
+                lastName: 'User',
+                role: 'ADMIN',
+                isActive: true,
+                createdAt: new Date().toISOString()
+            };
+            
+            const mockToken = 'mock-admin-token-12345';
+            
+            // Store in localStorage
+            localStorage.setItem('admin_token', mockToken);
+            localStorage.setItem('admin_user', JSON.stringify(mockUser));
+            
+            document.getElementById('result').innerHTML = `
+                ✅ Simulated admin login!<br>
+                User: ${mockUser.email} (${mockUser.role})<br>
+                <br>
+                <strong>Now test redirect:</strong><br>
+                <button onclick="testDirectRedirect()">Test Direct Redirect</button><br>
+                <br>
+                <strong>Manual links:</strong><br>
+                <a href="http://localhost:4200/admin/dashboard" target="_blank">Dashboard</a><br>
+                <a href="http://localhost:4200/admin" target="_blank">Admin Root</a>
+            `;
+        }
+    </script>
+</body>
+</html>

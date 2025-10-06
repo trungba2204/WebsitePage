@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { AdminAuthService } from './admin-auth.service';
 import { 
   AdminUser, 
   AdminDashboardStats, 
@@ -23,6 +24,7 @@ import { Order } from '../models/order.model';
 export class AdminService {
   private readonly API_URL = `${environment.apiUrl}/admin`;
   private http = inject(HttpClient);
+  private adminAuthService = inject(AdminAuthService);
 
   // Dashboard
   getDashboardStats(): Observable<AdminDashboardStats> {
@@ -155,6 +157,35 @@ export class AdminService {
     const formData = new FormData();
     formData.append('file', file);
     
-    return this.http.post<{ url: string }>(`${this.API_URL}/upload/image`, formData);
+    const token = this.adminAuthService.getToken();
+    let headers = new HttpHeaders();
+    
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
+    
+    console.log('🔍 AdminService uploadImage - Token exists:', !!token);
+    console.log('🔍 AdminService uploadImage - Headers:', headers.keys());
+    
+    return this.http.post<{ url: string }>(`${this.API_URL}/upload/image`, formData, {
+      headers: headers
+    });
+  }
+
+  // Team Management
+  getTeamMembers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/team`);
+  }
+
+  createTeamMember(member: any): Observable<any> {
+    return this.http.post<any>(`${this.API_URL}/team`, member);
+  }
+
+  updateTeamMember(id: number, member: any): Observable<any> {
+    return this.http.put<any>(`${this.API_URL}/team/${id}`, member);
+  }
+
+  deleteTeamMember(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/team/${id}`);
   }
 }

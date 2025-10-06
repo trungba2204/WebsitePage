@@ -1,10 +1,12 @@
-import { Component, inject, HostListener } from '@angular/core';
+import { Component, inject, HostListener, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { CartService } from '../../services/cart.service';
 import { ProductService } from '../../services/product.service';
+import { AdminService } from '../../services/admin.service';
+import { NotificationService } from '../../services/notification.service';
 import { Product } from '../../models/product.model';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { Subject, of } from 'rxjs';
@@ -16,10 +18,12 @@ import { Subject, of } from 'rxjs';
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   authService = inject(AuthService);
   cartService = inject(CartService);
   productService = inject(ProductService);
+  adminService = inject(AdminService);
+  notificationService = inject(NotificationService);
   router = inject(Router);
   
   isMenuOpen = false;
@@ -28,6 +32,21 @@ export class HeaderComponent {
   searchResults: Product[] = [];
   showSearchResults = false;
   isSearching = false;
+
+  // Avatar upload
+  isUploadingAvatar = false;
+  showAvatarModal = false;
+  
+  // Avatar URL signal
+  private avatarTimestamp = signal(Date.now());
+  avatarUrl = computed(() => {
+    const avatar = this.authService.currentUser()?.avatar;
+    if (!avatar) {
+      return 'https://via.placeholder.com/40';
+    }
+    const separator = avatar.includes('?') ? '&' : '?';
+    return `${avatar}${separator}t=${this.avatarTimestamp()}`;
+  });
   
   private searchSubject = new Subject<string>();
 
@@ -99,6 +118,111 @@ export class HeaderComponent {
 
   logout(): void {
     this.authService.logout();
+  }
+
+  // Avatar upload methods
+  openAvatarModal(): void {
+    this.showAvatarModal = true;
+    this.closeUserMenu();
+  }
+
+  closeAvatarModal(): void {
+    this.showAvatarModal = false;
+  }
+
+  onAvatarFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi!', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+      
+      // Check for HEIC format (not supported by web browsers)
+      const fileName = file.name.toLowerCase();
+      if (fileName.endsWith('.heic') || fileName.endsWith('.heif')) {
+        this.notificationService.showError('Lỗi!', 'Định dạng HEIC không được hỗ trợ trên web. Vui lòng chọn file JPG, PNG, GIF hoặc WEBP.');
+        return;
+      }
+      
+      // Check for web-compatible formats
+      const supportedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!supportedTypes.includes(file.type)) {
+        this.notificationService.showError('Lỗi!', 'Chỉ hỗ trợ định dạng JPG, PNG, GIF và WEBP. Vui lòng chọn file khác.');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi!', 'Kích thước file không được vượt quá 5MB');
+        return;
+      }
+      
+      this.uploadAvatar(file);
+    }
+  }
+
+  uploadAvatar(file: File): void {
+    this.isUploadingAvatar = true;
+    console.log('🔍 HeaderComponent uploadAvatar - Starting user avatar upload:', file.name);
+
+    this.adminService.uploadImage(file).subscribe({
+      next: (response: any) => {
+        console.log('✅ HeaderComponent uploadAvatar - Image upload success:', response.url);
+        
+        // Update user avatar in database via AuthService
+        this.authService.updateUserAvatar(response.url).subscribe({
+          next: (updatedUser) => {
+            console.log('✅ HeaderComponent uploadAvatar - Avatar updated in database:', updatedUser);
+            
+            this.isUploadingAvatar = false;
+            this.closeAvatarModal();
+            
+            // Update timestamp to force new URL generation
+            this.avatarTimestamp.set(Date.now());
+            
+            this.notificationService.showSuccess(
+              'Thành công!',
+              'Ảnh đại diện đã được cập nhật thành công'
+            );
+          },
+          error: (dbError) => {
+            this.isUploadingAvatar = false;
+            console.error('❌ HeaderComponent uploadAvatar - Database update error:', dbError);
+            this.notificationService.showError('Lỗi!', 'Không thể lưu ảnh đại diện vào database. Vui lòng thử lại.');
+          }
+        });
+      },
+      error: (uploadError) => {
+        this.isUploadingAvatar = false;
+        console.error('❌ HeaderComponent uploadAvatar - Image upload error:', uploadError);
+        this.notificationService.showError('Lỗi!', 'Không thể tải lên ảnh đại diện. Vui lòng thử lại.');
+      }
+    });
+  }
+
+
+  // Handle image loading success
+  onImageLoad(event: any): void {
+    // Show avatar image and hide icon
+    event.target.style.display = 'block';
+    const iconElement = event.target.nextElementSibling;
+    if (iconElement) {
+      iconElement.style.display = 'none';
+    }
+  }
+
+  // Handle image loading errors
+  onImageError(event: any): void {
+    // Hide avatar image and show icon
+    event.target.style.display = 'none';
+    const iconElement = event.target.nextElementSibling;
+    if (iconElement) {
+      iconElement.style.display = 'block';
+    }
   }
 
   formatPrice(price: number): string {

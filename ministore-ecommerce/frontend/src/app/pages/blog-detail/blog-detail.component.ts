@@ -21,6 +21,7 @@ export class BlogDetailComponent implements OnInit {
   recentBlogs: Blog[] = [];
   isLoading = true;
   isLiked = false;
+  readingProgress = 0;
   
   newComment: CreateBlogCommentRequest = {
     blogId: 0,

@@ -6,6 +6,9 @@ export interface Order {
   orderDate: Date;
   status: OrderStatus;
   totalAmount: number;
+  originalAmount?: number;
+  discountAmount?: number;
+  discountCode?: string;
   shippingAddress: Address;
   items: OrderItem[];
   userId: number;
@@ -35,6 +38,8 @@ export interface CreateOrderRequest {
   shippingAddress: Address;
   paymentMethod: string;
   note?: string;
+  discountCode?: string;
+  discountAmount?: number;
 }
 
 export enum OrderStatus {

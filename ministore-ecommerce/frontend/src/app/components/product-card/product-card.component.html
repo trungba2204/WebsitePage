@@ -1,6 +1,6 @@
 <a [routerLink]="['/products', product.id]" class="product-card">
   <div class="product-image">
-    <img [src]="product.imageUrl" [alt]="product.name" />
+    <img [src]="product.imageUrl" [alt]="product.name" appImageFallback />
     @if (product.stock === 0) {
       <div class="out-of-stock-badge">Hết hàng</div>
     }

@@ -112,15 +112,47 @@
                 </div>
 
                 <div class="col-md-6">
-                  <label for="imageUrl" class="form-label required">URL hình ảnh</label>
+                  <label for="imageUpload" class="form-label">Hình ảnh sản phẩm</label>
                   <input
-                    type="url"
-                    id="imageUrl"
+                    type="file"
+                    id="imageUpload"
                     class="form-control"
-                    [(ngModel)]="productForm.imageUrl"
-                    name="imageUrl"
-                    placeholder="https://example.com/image.jpg"
-                    required>
+                    accept="image/*"
+                    (change)="onImageSelected($event)"
+                    #fileInput>
+                  <div class="form-text">
+                    Chọn file ảnh từ máy tính (JPG, PNG, GIF) - Tùy chọn
+                  </div>
+                  
+                  <!-- Image Preview -->
+                  @if (selectedImagePreview) {
+                    <div class="mt-3">
+                      <img [src]="selectedImagePreview" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                      <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="removeImage()">
+                        <i class="bi bi-trash"></i> Xóa ảnh
+                      </button>
+                    </div>
+                  }
+                  
+                  <!-- Current Image Display -->
+                  @if (!selectedImagePreview && productForm.imageUrl) {
+                    <div class="mt-3">
+                      <label class="form-label">Ảnh hiện tại:</label>
+                      <img [src]="productForm.imageUrl" alt="Current image" class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                    </div>
+                  }
+                  
+                  <!-- Manual URL Input (Optional) -->
+                  <div class="mt-3">
+                    <label for="imageUrl" class="form-label">Hoặc nhập URL ảnh (tùy chọn):</label>
+                    <input
+                      type="url"
+                      id="imageUrl"
+                      class="form-control"
+                      [(ngModel)]="productForm.imageUrl"
+                      name="imageUrl"
+                      placeholder="https://example.com/image.jpg">
+                  </div>
                 </div>
               </div>
             </div>

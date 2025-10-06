@@ -28,26 +28,50 @@
 
     <div class="sidebar-footer">
       <div class="user-info" *ngIf="!isSidebarCollapsed">
-        <div class="user-avatar">
-          <img [src]="currentUser()?.avatar || 'https://via.placeholder.com/40'" 
-               [alt]="currentUser()?.firstName" 
-               class="avatar-img">
-        </div>
-        <div class="user-details">
-          <div class="user-name">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
-          <div class="user-role">{{ currentUser()?.role }}</div>
+        <div class="user-menu" [class.open]="isUserMenuOpen">
+          <button 
+            class="user-menu-trigger" 
+            (click)="toggleUserMenu()"
+            [title]="'Tài khoản admin'">
+            <div class="user-avatar">
+              <img [src]="avatarUrl()" 
+                   [alt]="getAdminDisplayName()" 
+                   class="avatar-img"
+                   (error)="onImageError($event)">
+            </div>
+            <div class="user-details">
+              <div class="user-name">{{ getAdminDisplayName() }}</div>
+              <div class="user-role">{{ getAdminRole() }}</div>
+            </div>
+            <i class="bi bi-chevron-down dropdown-icon"></i>
+          </button>
+          
+          <div class="user-dropdown" [class.show]="isUserMenuOpen">
+            <a (click)="openAvatarModal()" class="dropdown-item">
+              <i class="bi bi-camera me-2"></i>
+              Thay đổi ảnh đại diện
+            </a>
+            <div class="dropdown-divider"></div>
+            <a (click)="goToMainSite(); closeUserMenu()" class="dropdown-item">
+              <i class="bi bi-house me-2"></i>
+              Về trang chủ
+            </a>
+            <a (click)="logout(); closeUserMenu()" class="dropdown-item logout">
+              <i class="bi bi-box-arrow-right me-2"></i>
+              Đăng xuất
+            </a>
+          </div>
         </div>
       </div>
-      <div class="user-actions">
+      <!-- Compact buttons for collapsed sidebar -->
+      <div class="user-actions" *ngIf="isSidebarCollapsed">
         <button class="btn btn-outline-secondary btn-sm" (click)="goToMainSite()" 
-                [title]="isSidebarCollapsed ? 'Về trang chủ' : ''">
+                title="Về trang chủ">
           <i class="bi bi-house"></i>
-          <span *ngIf="!isSidebarCollapsed">Về trang chủ</span>
         </button>
         <button class="btn btn-outline-danger btn-sm" (click)="logout()" 
-                [title]="isSidebarCollapsed ? 'Đăng xuất' : ''">
+                title="Đăng xuất">
           <i class="bi bi-box-arrow-right"></i>
-          <span *ngIf="!isSidebarCollapsed">Đăng xuất</span>
         </button>
       </div>
     </div>
@@ -66,13 +90,14 @@
         <div class="header-actions">
           <div class="user-menu">
             <div class="user-avatar-small">
-              <img [src]="currentUser()?.avatar || 'https://via.placeholder.com/32'" 
-                   [alt]="currentUser()?.firstName" 
-                   class="avatar-small">
+              <img [src]="avatarUrl()" 
+                   [alt]="getAdminDisplayName()" 
+                   class="avatar-small"
+                   (error)="onImageError($event)">
             </div>
             <div class="user-info-small">
-              <div class="user-name-small">{{ currentUser()?.firstName }} {{ currentUser()?.lastName }}</div>
-              <div class="user-role-small">{{ currentUser()?.role }}</div>
+              <div class="user-name-small">{{ getAdminDisplayName() }}</div>
+              <div class="user-role-small">{{ getAdminRole() }}</div>
             </div>
           </div>
         </div>
@@ -85,3 +110,65 @@
     </div>
   </main>
 </div>
+
+<!-- Avatar Upload Modal -->
+@if (showAvatarModal) {
+  <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title">
+            <i class="bi bi-camera me-2"></i>
+            Thay đổi ảnh đại diện admin
+          </h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            (click)="closeAvatarModal()"
+            [disabled]="isUploadingAvatar">
+          </button>
+        </div>
+        <div class="modal-body pt-0">
+          <div class="upload-section">
+            <div class="upload-area" [class.uploading]="isUploadingAvatar">
+              <input 
+                type="file" 
+                id="adminAvatarUpload" 
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                (change)="onAvatarFileSelected($event)"
+                [disabled]="isUploadingAvatar"
+                style="display: none;">
+              
+              <label for="adminAvatarUpload" class="upload-label">
+                @if (isUploadingAvatar) {
+                  <div class="upload-content">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                      <span class="visually-hidden">Đang tải lên...</span>
+                    </div>
+                    <p class="upload-text">Đang tải lên ảnh...</p>
+                  </div>
+                } @else {
+                  <div class="upload-content">
+                    <i class="bi bi-cloud-upload upload-icon"></i>
+                    <p class="upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                    <small class="text-muted">JPG, PNG, GIF, WEBP tối đa 5MB (không hỗ trợ HEIC)</small>
+                  </div>
+                }
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            (click)="closeAvatarModal()"
+            [disabled]="isUploadingAvatar">
+            <i class="bi bi-x-circle me-1"></i>
+            Hủy bỏ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

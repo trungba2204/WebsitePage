@@ -122,7 +122,9 @@
                   <img [src]="member.image" 
                        [alt]="member.name" 
                        class="rounded-circle shadow team-avatar"
-                       style="width: 150px; height: 150px; object-fit: cover;">
+                       style="width: 150px; height: 150px; object-fit: cover;"
+                       appImageFallback
+                       [fallbackImage]="'https://via.placeholder.com/150x150/28a745/ffffff?text=' + encodeURIComponent(member.name.substring(0, 2))">
                 </div>
                 <h4 class="card-title mb-2 mb-md-3 text-success team-name">{{ member.name }}</h4>
                 <p class="text-primary fw-bold mb-3 mb-md-4 fs-5 team-position">{{ member.position }}</p>

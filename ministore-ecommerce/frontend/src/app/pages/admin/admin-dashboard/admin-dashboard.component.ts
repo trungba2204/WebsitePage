@@ -72,6 +72,7 @@ export class AdminDashboardComponent implements OnInit {
       this.orderService.getUserOrders().subscribe({
         next: (orders: any) => {
           this.stats.totalOrders = orders.length || 0;
+          
           this.stats.totalRevenue = orders.reduce((sum: number, order: any) => sum + (order.totalAmount || 0), 0);
           this.recentOrders = orders.slice(0, 5); // Get 5 most recent orders
           resolve();

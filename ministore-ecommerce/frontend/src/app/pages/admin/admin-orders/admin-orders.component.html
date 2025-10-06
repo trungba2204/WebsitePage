@@ -111,7 +111,28 @@
                 </td>
                 <td>
                   <div class="order-total">
-                    <strong class="total-amount">{{ formatPrice(order.totalAmount) }}</strong>
+                    @if (order.discountCode && order.discountAmount) {
+                      <div class="discount-info mb-1">
+                        <span class="badge bg-success">
+                          <i class="bi bi-ticket-perforated me-1"></i>
+                          {{ order.discountCode }}
+                        </span>
+                        <small class="text-success d-block">
+                          <i class="bi bi-gift me-1"></i>
+                          Tiết kiệm {{ formatPrice(order.discountAmount) }}
+                        </small>
+                      </div>
+                      <div class="amount-breakdown">
+                        <small class="text-muted text-decoration-line-through">
+                          {{ formatPrice(order.originalAmount || order.totalAmount) }}
+                        </small>
+                        <strong class="total-amount text-success ms-2">
+                          {{ formatPrice(order.totalAmount) }}
+                        </strong>
+                      </div>
+                    } @else {
+                      <strong class="total-amount">{{ formatPrice(order.totalAmount) }}</strong>
+                    }
                   </div>
                 </td>
                 <td>
@@ -162,11 +183,11 @@
                       <i class="bi bi-eye"></i>
                     </a>
                     @if (order.status === 'PENDING') {
-                        <button 
-                          class="btn btn-outline-danger btn-sm" 
-                          (click)="updateOrderStatus(order, OrderStatus.CANCELLED)"
-                          [disabled]="isUpdating && updatingOrderId === order.id"
-                          title="Hủy đơn hàng">
+                      <button 
+                        class="btn btn-outline-danger btn-sm" 
+                        (click)="updateOrderStatus(order, OrderStatus.CANCELLED)"
+                        [disabled]="isUpdating && updatingOrderId === order.id"
+                        title="Hủy đơn hàng">
                         @if (isUpdating && updatingOrderId === order.id) {
                           <span class="spinner-border spinner-border-sm"></span>
                         } @else {
@@ -229,3 +250,57 @@
     }
   </div>
 </div>
+
+<!-- Confirmation Modal -->
+@if (showConfirmModal) {
+  <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title">
+            <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+            {{ confirmTitle }}
+          </h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            (click)="cancelStatusUpdate()"
+            [disabled]="isConfirming">
+          </button>
+        </div>
+        <div class="modal-body pt-0">
+          <div class="alert alert-warning d-flex align-items-center mb-3">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            <div>
+              <strong>Lưu ý:</strong> Hành động này không thể hoàn tác
+            </div>
+          </div>
+          <p class="mb-0">{{ confirmMessage }}</p>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            (click)="cancelStatusUpdate()"
+            [disabled]="isConfirming">
+            <i class="bi bi-x-circle me-1"></i>
+            Hủy bỏ
+          </button>
+          <button 
+            type="button" 
+            class="btn btn-primary" 
+            (click)="confirmStatusUpdate()"
+            [disabled]="isConfirming">
+            @if (isConfirming) {
+              <span class="spinner-border spinner-border-sm me-1"></span>
+              Đang cập nhật...
+            } @else {
+              <i class="bi bi-check-circle me-1"></i>
+              Xác nhận
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

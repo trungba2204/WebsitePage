@@ -6,11 +6,12 @@ import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { NotificationService } from '../../services/notification.service';
 import { Product } from '../../models/product.model';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ImageFallbackDirective],
   templateUrl: './product-detail.component.html',
   styleUrl: './product-detail.component.scss'
 })
@@ -24,6 +25,8 @@ export class ProductDetailComponent implements OnInit {
   quantity = 1;
   isLoading = true;
   isAddingToCart = false;
+  activeTab = 'description';
+  isFavorite = false;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -88,6 +91,19 @@ export class ProductDetailComponent implements OnInit {
       style: 'currency',
       currency: 'VND'
     }).format(price);
+  }
+
+  setActiveTab(tab: string): void {
+    this.activeTab = tab;
+  }
+
+  toggleFavorite(): void {
+    this.isFavorite = !this.isFavorite;
+    if (this.isFavorite) {
+      this.notificationService.showSuccess('Thành công!', 'Đã thêm vào danh sách yêu thích');
+    } else {
+      this.notificationService.showSuccess('Thành công!', 'Đã xóa khỏi danh sách yêu thích');
+    }
   }
 }
 

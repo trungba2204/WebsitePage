@@ -97,7 +97,16 @@ public class OrderController {
             order.setOrderNumber(generateOrderNumber());
             order.setOrderDate(LocalDateTime.now());
             order.setStatus(Order.OrderStatus.PENDING);
-            order.setTotalAmount(cart.getTotalPrice());
+            
+            // Calculate total with discount
+            BigDecimal originalAmount = cart.getTotalPrice();
+            BigDecimal discountAmount = request.getDiscountAmount() != null ? request.getDiscountAmount() : BigDecimal.ZERO;
+            BigDecimal finalAmount = originalAmount.subtract(discountAmount);
+            
+            order.setOriginalAmount(originalAmount);
+            order.setDiscountAmount(discountAmount);
+            order.setDiscountCode(request.getDiscountCode());
+            order.setTotalAmount(finalAmount);
             order.setShippingAddress(convertToShippingAddress(request.getShippingAddress()));
             order.setPaymentMethod(request.getPaymentMethod());
             order.setNote(request.getNote());
@@ -149,6 +158,8 @@ public class OrderController {
         private AddressDto shippingAddress;
         private String paymentMethod;
         private String note;
+        private String discountCode;
+        private java.math.BigDecimal discountAmount;
 
         public AddressDto getShippingAddress() { return shippingAddress; }
         public void setShippingAddress(AddressDto shippingAddress) { this.shippingAddress = shippingAddress; }
@@ -156,6 +167,10 @@ public class OrderController {
         public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
         public String getNote() { return note; }
         public void setNote(String note) { this.note = note; }
+        public String getDiscountCode() { return discountCode; }
+        public void setDiscountCode(String discountCode) { this.discountCode = discountCode; }
+        public java.math.BigDecimal getDiscountAmount() { return discountAmount; }
+        public void setDiscountAmount(java.math.BigDecimal discountAmount) { this.discountAmount = discountAmount; }
 
         public static class AddressDto {
             private String fullName;

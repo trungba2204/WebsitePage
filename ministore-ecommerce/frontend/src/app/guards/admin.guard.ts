@@ -10,33 +10,37 @@ export class AdminGuard implements CanActivate {
   router = inject(Router);
 
   canActivate(): boolean {
-    console.log('AdminGuard: Checking authentication...');
+    console.log('🔍 AdminGuard: Checking authentication...');
     
     // Check localStorage directly first
     const token = localStorage.getItem('admin_token');
     const userStr = localStorage.getItem('admin_user');
     
-    console.log('AdminGuard: Token exists =', !!token);
-    console.log('AdminGuard: User exists =', !!userStr);
+    console.log('🔍 AdminGuard: Token exists =', !!token);
+    console.log('🔍 AdminGuard: User exists =', !!userStr);
     
     if (token && userStr) {
       try {
-        const user = JSON.parse(userStr);
-        console.log('AdminGuard: User role =', user.role);
+        const user = JSON.parse(userStr as string);
+        console.log('🔍 AdminGuard: User role =', user.role);
         
         if (user.role === 'ADMIN') {
-          console.log('AdminGuard: Access granted via localStorage');
+          console.log('✅ AdminGuard: Access granted via localStorage');
           // Update signals to match localStorage
           this.adminAuthService.adminUserSignal.set(user);
           this.adminAuthService.isAuthenticatedSignal.set(true);
           return true;
+        } else {
+          console.log('❌ AdminGuard: User role is not ADMIN:', user.role);
         }
       } catch (error) {
-        console.error('AdminGuard: Error parsing user from localStorage', error);
+        console.error('❌ AdminGuard: Error parsing user from localStorage', error);
       }
+    } else {
+      console.log('🔍 AdminGuard: No token or user data found');
     }
     
-    console.log('AdminGuard: Access denied, redirecting to login');
+    console.log('❌ AdminGuard: Access denied, redirecting to login');
     // Redirect to admin login if not authenticated or not admin
     this.router.navigate(['/admin/login']);
     return false;

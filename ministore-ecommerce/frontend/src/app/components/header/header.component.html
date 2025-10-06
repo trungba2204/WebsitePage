@@ -13,6 +13,7 @@
       <ul class="navbar-menu">
         <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Trang chủ</a></li>
         <li><a routerLink="/products" routerLinkActive="active">Sản phẩm</a></li>
+        <li><a routerLink="/promotions" routerLinkActive="active">Mã giảm giá</a></li>
         <li><a routerLink="/blogs" routerLinkActive="active">Blog</a></li>
         <li><a routerLink="/about" routerLinkActive="active">Giới thiệu</a></li>
         <li><a routerLink="/contact" routerLinkActive="active">Liên hệ</a></li>
@@ -87,11 +88,8 @@
               title="Tài khoản"
               (click)="toggleUserMenu()"
               (blur)="onUserMenuBlur()">
-              @if (authService.currentUser()?.avatar) {
-                <img [src]="authService.currentUser()?.avatar" [alt]="authService.currentUser()?.firstName" class="user-avatar">
-              } @else {
-                <i class="bi bi-person-circle"></i>
-              }
+              <img [src]="avatarUrl()" [alt]="authService.currentUser()?.firstName" class="user-avatar" (load)="onImageLoad($event)" (error)="onImageError($event)" style="display: none;">
+              <i class="bi bi-person-circle" style="display: block;"></i>
             </button>
             <div class="dropdown" [class.show]="isUserMenuOpen">
               <div class="user-info">
@@ -104,6 +102,9 @@
               </a>
               <a routerLink="/orders" (click)="closeUserMenu()">
                 <i class="bi bi-box-seam"></i> Đơn hàng
+              </a>
+              <a (click)="openAvatarModal()" class="avatar-change">
+                <i class="bi bi-camera"></i> Thay đổi ảnh đại diện
               </a>
               <a (click)="logout(); closeUserMenu()" class="logout">
                 <i class="bi bi-box-arrow-right"></i> Đăng xuất
@@ -128,6 +129,7 @@
       <div class="mobile-menu">
         <a routerLink="/" (click)="toggleMenu()">Trang chủ</a>
         <a routerLink="/products" (click)="toggleMenu()">Sản phẩm</a>
+        <a routerLink="/promotions" (click)="toggleMenu()">Mã giảm giá</a>
         <a routerLink="/blogs" (click)="toggleMenu()">Blog</a>
         <a routerLink="/about" (click)="toggleMenu()">Giới thiệu</a>
         <a routerLink="/contact" (click)="toggleMenu()">Liên hệ</a>
@@ -140,4 +142,66 @@
     }
   </div>
 </header>
+
+<!-- Avatar Upload Modal -->
+@if (showAvatarModal) {
+  <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title">
+            <i class="bi bi-camera me-2"></i>
+            Thay đổi ảnh đại diện
+          </h5>
+          <button 
+            type="button" 
+            class="btn-close" 
+            (click)="closeAvatarModal()"
+            [disabled]="isUploadingAvatar">
+          </button>
+        </div>
+        <div class="modal-body pt-0">
+          <div class="upload-section">
+            <div class="upload-area" [class.uploading]="isUploadingAvatar">
+              <input 
+                type="file" 
+                id="avatarUpload" 
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                (change)="onAvatarFileSelected($event)"
+                [disabled]="isUploadingAvatar"
+                style="display: none;">
+              
+              <label for="avatarUpload" class="upload-label">
+                @if (isUploadingAvatar) {
+                  <div class="upload-content">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                      <span class="visually-hidden">Đang tải lên...</span>
+                    </div>
+                    <p class="upload-text">Đang tải lên ảnh...</p>
+                  </div>
+                } @else {
+                  <div class="upload-content">
+                    <i class="bi bi-cloud-upload upload-icon"></i>
+                    <p class="upload-text">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                    <small class="text-muted">JPG, PNG, GIF, WEBP tối đa 5MB (không hỗ trợ HEIC)</small>
+                  </div>
+                }
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0">
+          <button 
+            type="button" 
+            class="btn btn-secondary" 
+            (click)="closeAvatarModal()"
+            [disabled]="isUploadingAvatar">
+            <i class="bi bi-x-circle me-1"></i>
+            Hủy bỏ
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
