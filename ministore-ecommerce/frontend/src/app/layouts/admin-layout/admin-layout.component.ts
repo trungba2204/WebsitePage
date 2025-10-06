@@ -104,6 +104,9 @@ export class AdminLayoutComponent implements OnInit {
     // Set initial active menu item
     this.updateActiveMenuItem();
 
+    // Refresh admin user data from database to ensure avatar is loaded
+    this.refreshAdminUser();
+
     // Debug admin user data
     console.log('🔍 AdminLayoutComponent ngOnInit - Admin user:', this.currentUser());
     console.log('🔍 AdminLayoutComponent ngOnInit - Admin avatar:', this.currentUser()?.avatar);
@@ -114,6 +117,20 @@ export class AdminLayoutComponent implements OnInit {
     this.menuItems.forEach(item => {
       item.active = this.currentRoute === item.route || 
                    (item.route !== '/admin/dashboard' && this.currentRoute.startsWith(item.route));
+    });
+  }
+
+  refreshAdminUser(): void {
+    console.log('🔍 AdminLayoutComponent refreshAdminUser - Refreshing admin user data');
+    this.adminAuthService.refreshAdminUser().subscribe({
+      next: (user) => {
+        console.log('✅ AdminLayoutComponent refreshAdminUser - User data refreshed:', user);
+        // Update timestamp to force avatar URL refresh
+        this.avatarTimestamp.set(Date.now());
+      },
+      error: (error) => {
+        console.error('❌ AdminLayoutComponent refreshAdminUser - Error refreshing user data:', error);
+      }
     });
   }
 

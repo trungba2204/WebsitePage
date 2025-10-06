@@ -108,5 +108,11 @@ public class AuthService {
             throw new RuntimeException("Failed to upload avatar", e);
         }
     }
+
+    public UserDTO getCurrentUser(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return UserDTO.fromEntity(user);
+    }
 }
 

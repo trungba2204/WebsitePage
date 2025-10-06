@@ -184,4 +184,27 @@ export class AdminAuthService {
       })
     );
   }
+
+  refreshAdminUser(): Observable<User> {
+    console.log('🔍 AdminAuthService refreshAdminUser - Refreshing admin user data from database');
+    
+    const token = this.getToken();
+    console.log('🔍 AdminAuthService refreshAdminUser - Using admin token:', !!token);
+    console.log('🔍 AdminAuthService refreshAdminUser - Token preview:', token?.substring(0, 20) + '...');
+    
+    const headers: { [key: string]: string } = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return this.http.get<User>(`${this.API_URL}/admin/me`, { headers }).pipe(
+      tap((user: User) => {
+        console.log('✅ AdminAuthService refreshAdminUser - User data refreshed:', user);
+        console.log('✅ AdminAuthService refreshAdminUser - User role:', user.role);
+        console.log('✅ AdminAuthService refreshAdminUser - User email:', user.email);
+        localStorage.setItem('admin_user', JSON.stringify(user));
+        this.adminUserSignal.set(user);
+      })
+    );
+  }
 }

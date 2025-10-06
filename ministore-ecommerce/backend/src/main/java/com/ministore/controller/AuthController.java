@@ -35,5 +35,15 @@ public class AuthController {
             Authentication authentication) {
         return ResponseEntity.ok(authService.updateUserAvatar(file, authentication.getName()));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        return ResponseEntity.ok(authService.getCurrentUser(authentication.getName()));
+    }
+
+    @GetMapping("/admin/me")
+    public ResponseEntity<UserDTO> getCurrentAdminUser(Authentication authentication) {
+        return ResponseEntity.ok(authService.getCurrentUser(authentication.getName()));
+    }
 }
 
