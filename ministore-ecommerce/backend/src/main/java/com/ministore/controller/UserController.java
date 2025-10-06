@@ -3,6 +3,7 @@ package com.ministore.controller;
 import com.ministore.dto.UserDTO;
 import com.ministore.entity.User;
 import com.ministore.repository.UserRepository;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;

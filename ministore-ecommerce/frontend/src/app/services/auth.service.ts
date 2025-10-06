@@ -117,7 +117,7 @@ export class AuthService {
 
   updateUserAvatar(avatarUrl: string): Observable<User> {
     console.log('🔍 AuthService updateUserAvatar - Updating avatar to:', avatarUrl);
-    return this.http.put<User>(`${this.API_URL}/user/avatar`, { avatar: avatarUrl }).pipe(
+    return this.http.put<User>(`${environment.apiUrl}/user/avatar`, { avatar: avatarUrl }).pipe(
       tap(updatedUser => {
         console.log('✅ AuthService updateUserAvatar - Avatar updated successfully:', updatedUser);
         this.updateCurrentUser(updatedUser);
