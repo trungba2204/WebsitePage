@@ -165,4 +165,23 @@ export class AdminAuthService {
       this.adminUserSignal.set(updatedUser);
     }
   }
+
+  uploadAvatar(file: File): Observable<User> {
+    console.log('🔍 AdminAuthService uploadAvatar - Uploading file:', file.name);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const token = this.getToken();
+    const headers: { [key: string]: string } = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    return this.http.post<User>(`${this.API_URL}/upload-avatar`, formData, { headers }).pipe(
+      tap((updatedUser: User) => {
+        console.log('✅ AdminAuthService uploadAvatar - Avatar uploaded successfully:', updatedUser);
+        this.updateAdminAvatar(updatedUser);
+      })
+    );
+  }
 }
