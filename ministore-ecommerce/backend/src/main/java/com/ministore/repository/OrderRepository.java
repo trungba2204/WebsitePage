@@ -20,5 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByOrderDateAfter(LocalDateTime date);
     
     long countByStatus(Order.OrderStatus status);
+    
+    // Date range queries for analytics
+    List<Order> findByOrderDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 }
 

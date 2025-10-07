@@ -21,6 +21,10 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-dashboard/admin-dashboard.component').then(m => m.AdminDashboardComponent)
       },
       {
+        path: 'analytics',
+        loadComponent: () => import('./admin-analytics/admin-analytics.component').then(m => m.AdminAnalyticsComponent)
+      },
+      {
         path: 'products',
         loadComponent: () => import('./admin-products/admin-products.component').then(m => m.AdminProductsComponent)
       },

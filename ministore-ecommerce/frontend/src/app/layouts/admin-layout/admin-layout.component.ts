@@ -49,6 +49,12 @@ export class AdminLayoutComponent implements OnInit {
       active: false
     },
     {
+      label: 'Phân tích',
+      icon: 'bi-graph-up-arrow',
+      route: '/admin/analytics',
+      active: false
+    },
+    {
       label: 'Sản phẩm',
       icon: 'bi-box-seam',
       route: '/admin/products',

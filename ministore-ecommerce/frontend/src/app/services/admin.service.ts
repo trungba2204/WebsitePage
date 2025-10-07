@@ -205,4 +205,10 @@ export class AdminService {
       headers: headers
     });
   }
+
+  // Analytics
+  getAnalyticsData(period: string = '7d'): Observable<any> {
+    const params = new HttpParams().set('period', period);
+    return this.http.get<any>(`${this.API_URL}/analytics`, { params });
+  }
 }
