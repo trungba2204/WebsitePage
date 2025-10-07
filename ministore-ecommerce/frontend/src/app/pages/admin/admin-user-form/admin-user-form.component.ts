@@ -23,6 +23,9 @@ export class AdminUserFormComponent implements OnInit {
   isSaving = false;
   isEditMode = false;
   userId: number | null = null;
+  isUploadingImage = false;
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
 
   userForm = {
     firstName: '',
@@ -30,7 +33,7 @@ export class AdminUserFormComponent implements OnInit {
     email: '',
     phone: '',
     avatar: '',
-    role: 'USER',
+    role: 'USER' as 'USER' | 'ADMIN' | 'SUPER_ADMIN',
     isActive: true,
     password: '',
     confirmPassword: ''
@@ -43,12 +46,20 @@ export class AdminUserFormComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    // Check if we're editing
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id && id !== 'new') {
-      this.isEditMode = true;
-      this.userId = +id;
-      this.loadUser();
+    try {
+      console.log('🔍 AdminUserFormComponent - ngOnInit called');
+      // Check if we're editing
+      const id = this.route.snapshot.paramMap.get('id');
+      console.log('🔍 AdminUserFormComponent - Route ID:', id);
+      if (id && id !== 'new') {
+        this.isEditMode = true;
+        this.userId = +id;
+        this.loadUser();
+      } else {
+        console.log('🔍 AdminUserFormComponent - Creating new user mode');
+      }
+    } catch (error) {
+      console.error('❌ AdminUserFormComponent - Error in ngOnInit:', error);
     }
   }
 
@@ -69,6 +80,11 @@ export class AdminUserFormComponent implements OnInit {
           password: '',
           confirmPassword: ''
         };
+        
+        // Set image preview if user has avatar
+        if (user.avatar) {
+          this.imagePreview = user.avatar;
+        }
         this.isLoading = false;
       },
       error: (error) => {
@@ -120,7 +136,7 @@ export class AdminUserFormComponent implements OnInit {
           this.notificationService.showSuccess('Thành công!', 'Người dùng đã được tạo');
           this.router.navigate(['/admin/users']);
         },
-        error: (error) => {
+        error: (error: any) => {
           this.isSaving = false;
           console.error('Error creating user:', error);
           this.notificationService.showError('Lỗi!', 'Không thể tạo người dùng');
@@ -188,6 +204,61 @@ export class AdminUserFormComponent implements OnInit {
   getRoleLabel(role: string): string {
     const roleOption = this.roleOptions.find(r => r.value === role);
     return roleOption ? roleOption.label : role;
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi!', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi!', 'Kích thước file không được vượt quá 5MB');
+        return;
+      }
+      
+      this.selectedFile = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagePreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+      
+      // Upload image
+      this.uploadImage(file);
+    }
+  }
+
+  uploadImage(file: File): void {
+    this.isUploadingImage = true;
+    
+    this.adminService.uploadImage(file).subscribe({
+      next: (response: any) => {
+        console.log('✅ Image uploaded successfully:', response);
+        this.userForm.avatar = response.url;
+        this.isUploadingImage = false;
+        this.notificationService.showSuccess('Thành công!', 'Ảnh đã được upload thành công');
+      },
+      error: (error: any) => {
+        console.error('❌ Error uploading image:', error);
+        this.isUploadingImage = false;
+        this.notificationService.showError('Lỗi!', 'Không thể upload ảnh. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  removeImage(): void {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.userForm.avatar = '';
   }
 
   generateRandomPassword(): void {

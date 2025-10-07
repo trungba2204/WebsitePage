@@ -73,6 +73,14 @@ export const adminRoutes: Routes = [
         loadComponent: () => import('./admin-users/admin-users.component').then(m => m.AdminUsersComponent)
       },
       {
+        path: 'users/new',
+        loadComponent: () => import('./admin-user-form/admin-user-form.component').then(m => m.AdminUserFormComponent)
+      },
+      {
+        path: 'users/:id/edit',
+        loadComponent: () => import('./admin-user-form/admin-user-form.component').then(m => m.AdminUserFormComponent)
+      },
+      {
         path: 'discount-codes',
         loadComponent: () => import('./admin-discount-codes/admin-discount-codes.component').then(m => m.AdminDiscountCodesComponent)
       },

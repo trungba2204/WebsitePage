@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/team").permitAll()
                         .requestMatchers("/api/admin/**").authenticated()
                         .requestMatchers("/api/temp/**").permitAll()
+                        .requestMatchers("/api/views/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .anyRequest().authenticated()

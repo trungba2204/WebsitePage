@@ -15,6 +15,8 @@ interface AnalyticsData {
   totalViews: number;
   totalRevenue: number;
   averageOrderValue: number;
+  conversionRate: number;
+  uniqueVisitors: number;
 }
 
 @Component({
@@ -97,7 +99,9 @@ export class AdminAnalyticsComponent implements OnInit {
       ],
       totalViews: 11340,
       totalRevenue: 30500000,
-      averageOrderValue: 2689
+      averageOrderValue: 2689,
+      conversionRate: 3.2,
+      uniqueVisitors: 850
     };
     
     this.analyticsData = mockData;

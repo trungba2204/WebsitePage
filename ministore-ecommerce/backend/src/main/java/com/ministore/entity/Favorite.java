@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDateTime;
 
@@ -27,8 +28,20 @@ public class Favorite {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    // Computed field for frontend compatibility
+    @JsonProperty("productId")
+    @Transient
+    private Long productId;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    @PostLoad
+    @PostPersist
+    @PostUpdate
+    protected void onLoad() {
+        this.productId = product != null ? product.getId() : null;
     }
 }

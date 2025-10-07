@@ -125,6 +125,10 @@ export class AdminService {
     return this.http.get<AdminUser>(`${this.API_URL}/users/${id}`);
   }
 
+  createUser(user: Partial<AdminUser> & { password: string }): Observable<AdminUser> {
+    return this.http.post<AdminUser>(`${this.API_URL}/users`, user);
+  }
+
   updateUser(user: Partial<AdminUser>): Observable<AdminUser> {
     return this.http.put<AdminUser>(`${this.API_URL}/users/${user.id}`, user);
   }

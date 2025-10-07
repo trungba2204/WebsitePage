@@ -14,14 +14,16 @@ import java.time.LocalDateTime;
 public class FavoriteDTO {
     private Long id;
     private Long userId;
-    private ProductDTO product;
+    private Long productId;
+    private Product product;
     private LocalDateTime createdAt;
 
     public static FavoriteDTO fromEntity(Favorite favorite) {
         FavoriteDTO dto = new FavoriteDTO();
         dto.setId(favorite.getId());
         dto.setUserId(favorite.getUserId());
-        dto.setProduct(ProductDTO.fromEntity(favorite.getProduct()));
+        dto.setProductId(favorite.getProduct() != null ? favorite.getProduct().getId() : null);
+        dto.setProduct(favorite.getProduct());
         dto.setCreatedAt(favorite.getCreatedAt());
         return dto;
     }

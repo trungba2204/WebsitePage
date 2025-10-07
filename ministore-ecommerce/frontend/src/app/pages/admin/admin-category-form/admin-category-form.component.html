@@ -69,14 +69,52 @@
                 </div>
 
                 <div class="col-md-12">
-                  <label for="imageUrl" class="form-label">URL hình ảnh</label>
-                  <input
-                    type="url"
-                    id="imageUrl"
-                    class="form-control"
-                    [(ngModel)]="categoryForm.imageUrl"
-                    name="imageUrl"
-                    placeholder="https://example.com/category-image.jpg">
+                  <label for="imageUrl" class="form-label">Hình ảnh danh mục</label>
+                  <div class="image-upload-container">
+                    <div class="upload-area" 
+                         [class.uploading]="isUploadingImage"
+                         (click)="fileInput.click()">
+                      @if (isUploadingImage) {
+                        <div class="upload-progress">
+                          <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Đang upload...</span>
+                          </div>
+                          <p class="mt-2 mb-0">Đang upload ảnh...</p>
+                        </div>
+                      } @else if (imagePreview) {
+                        <div class="image-preview">
+                          <img [src]="imagePreview" alt="Preview" class="preview-img">
+                          <div class="overlay">
+                            <i class="bi bi-camera"></i>
+                            <p>Thay đổi ảnh</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="upload-placeholder">
+                          <i class="bi bi-cloud-upload"></i>
+                          <p>Click để chọn ảnh từ máy tính</p>
+                          <small class="text-muted">JPG, PNG, GIF (tối đa 5MB)</small>
+                        </div>
+                      }
+                    </div>
+                    
+                    <input #fileInput
+                           type="file"
+                           accept="image/*"
+                           (change)="onImageSelected($event)"
+                           style="display: none;">
+                    
+                    @if (imagePreview) {
+                      <div class="image-actions mt-2">
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="removeImage()">
+                          <i class="bi bi-trash me-1"></i>
+                          Xóa ảnh
+                        </button>
+                      </div>
+                    }
+                  </div>
                   <div class="form-text">
                     Hình ảnh đại diện cho danh mục (tùy chọn)
                   </div>
@@ -96,7 +134,7 @@
               
               <div class="image-preview">
                 <div class="preview-container">
-                  <img [src]="previewImage()" [alt]="categoryForm.name || 'Danh mục'" class="preview-image">
+                  <img [src]="imagePreview || 'assets/images/placeholder-category.jpg'" [alt]="categoryForm.name || 'Danh mục'" class="preview-image">
                   <div class="preview-overlay">
                     <div class="preview-info">
                       <i class="bi bi-eye"></i>

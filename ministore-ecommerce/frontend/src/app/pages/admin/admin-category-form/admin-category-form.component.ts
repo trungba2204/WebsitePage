@@ -24,6 +24,9 @@ export class AdminCategoryFormComponent implements OnInit {
   isSaving = false;
   isEditMode = false;
   categoryId: number | null = null;
+  isUploadingImage = false;
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
 
   categoryForm = {
     name: '',
@@ -52,6 +55,12 @@ export class AdminCategoryFormComponent implements OnInit {
           description: category.description || '',
           imageUrl: category.imageUrl || ''
         };
+        
+        // Set image preview if category has image
+        if (category.imageUrl) {
+          this.imagePreview = category.imageUrl;
+        }
+        
         this.isLoading = false;
       },
       error: (error) => {
@@ -117,6 +126,61 @@ export class AdminCategoryFormComponent implements OnInit {
     }
 
     return true;
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        this.notificationService.showError('Lỗi!', 'Vui lòng chọn file ảnh hợp lệ');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        this.notificationService.showError('Lỗi!', 'Kích thước file không được vượt quá 5MB');
+        return;
+      }
+      
+      this.selectedFile = file;
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagePreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+      
+      // Upload image
+      this.uploadImage(file);
+    }
+  }
+
+  uploadImage(file: File): void {
+    this.isUploadingImage = true;
+    
+    this.adminService.uploadImage(file).subscribe({
+      next: (response: any) => {
+        console.log('✅ Image uploaded successfully:', response);
+        this.categoryForm.imageUrl = response.url;
+        this.isUploadingImage = false;
+        this.notificationService.showSuccess('Thành công!', 'Ảnh đã được upload thành công');
+      },
+      error: (error: any) => {
+        console.error('❌ Error uploading image:', error);
+        this.isUploadingImage = false;
+        this.notificationService.showError('Lỗi!', 'Không thể upload ảnh. Vui lòng thử lại.');
+      }
+    });
+  }
+
+  removeImage(): void {
+    this.selectedFile = null;
+    this.imagePreview = null;
+    this.categoryForm.imageUrl = '';
   }
 
   onCancel(): void {

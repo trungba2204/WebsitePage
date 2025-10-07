@@ -90,14 +90,52 @@
                 </div>
 
                 <div class="col-md-12">
-                  <label for="avatar" class="form-label">Avatar URL</label>
-                  <input
-                    type="url"
-                    id="avatar"
-                    class="form-control"
-                    [(ngModel)]="userForm.avatar"
-                    name="avatar"
-                    placeholder="https://example.com/avatar.jpg">
+                  <label for="avatar" class="form-label">Ảnh đại diện</label>
+                  <div class="image-upload-container">
+                    <div class="upload-area" 
+                         [class.uploading]="isUploadingImage"
+                         (click)="fileInput.click()">
+                      @if (isUploadingImage) {
+                        <div class="upload-progress">
+                          <div class="spinner-border spinner-border-sm text-primary" role="status">
+                            <span class="visually-hidden">Đang upload...</span>
+                          </div>
+                          <p class="mt-2 mb-0">Đang upload ảnh...</p>
+                        </div>
+                      } @else if (imagePreview) {
+                        <div class="image-preview">
+                          <img [src]="imagePreview" alt="Preview" class="preview-img">
+                          <div class="overlay">
+                            <i class="bi bi-camera"></i>
+                            <p>Thay đổi ảnh</p>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="upload-placeholder">
+                          <i class="bi bi-cloud-upload"></i>
+                          <p>Click để chọn ảnh từ máy tính</p>
+                          <small class="text-muted">JPG, PNG, GIF (tối đa 5MB)</small>
+                        </div>
+                      }
+                    </div>
+                    
+                    <input #fileInput
+                           type="file"
+                           accept="image/*"
+                           (change)="onImageSelected($event)"
+                           style="display: none;">
+                    
+                    @if (imagePreview) {
+                      <div class="image-actions mt-2">
+                        <button type="button" 
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="removeImage()">
+                          <i class="bi bi-trash me-1"></i>
+                          Xóa ảnh
+                        </button>
+                      </div>
+                    }
+                  </div>
                 </div>
               </div>
             </div>
@@ -159,8 +197,8 @@
               
               <div class="avatar-preview">
                 <div class="preview-container">
-                  @if (userForm.avatar) {
-                    <img [src]="previewAvatar()" [alt]="userForm.firstName + ' ' + userForm.lastName" class="preview-image">
+                  @if (imagePreview) {
+                    <img [src]="imagePreview" [alt]="userForm.firstName + ' ' + userForm.lastName" class="preview-image">
                   } @else {
                     <div class="avatar-placeholder">
                       {{ getInitials() }}
@@ -234,7 +272,10 @@
                 <div class="summary-item">
                   <span class="label">Vai trò:</span>
                   <span class="value">
-                    <span [class]="'badge ' + getRoleBadgeClass(userForm.role)">
+                    <span class="badge role-badge" 
+                          [class.super-admin]="userForm.role === 'SUPER_ADMIN'"
+                          [class.admin]="userForm.role === 'ADMIN'"
+                          [class.user]="userForm.role === 'USER'">
                       {{ getRoleLabel(userForm.role) }}
                     </span>
                   </span>

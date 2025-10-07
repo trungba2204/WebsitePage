@@ -4,6 +4,7 @@ import com.ministore.repository.OrderRepository;
 import com.ministore.repository.BlogRepository;
 import com.ministore.repository.UserRepository;
 import com.ministore.repository.ProductRepository;
+import com.ministore.repository.ViewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,7 @@ public class AnalyticsService {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ViewRepository viewRepository;
 
     public Map<String, Object> getAnalyticsData(String period) {
         Map<String, Object> result = new HashMap<>();
@@ -44,12 +46,16 @@ public class AnalyticsService {
                 .sum();
         
         double averageOrderValue = calculateRealAverageOrderValue(startDate, endDate);
+        double conversionRate = calculateRealConversionRate(startDate, endDate);
+        long uniqueVisitors = calculateUniqueVisitors(startDate, endDate);
         
         result.put("views", viewsData);
         result.put("revenue", revenueData);
         result.put("totalViews", totalViews);
         result.put("totalRevenue", totalRevenue);
         result.put("averageOrderValue", averageOrderValue);
+        result.put("conversionRate", conversionRate);
+        result.put("uniqueVisitors", uniqueVisitors);
         
         return result;
     }
@@ -70,44 +76,29 @@ public class AnalyticsService {
     private List<Map<String, Object>> getRealViewsData(LocalDate startDate, LocalDate endDate) {
         List<Map<String, Object>> viewsData = new ArrayList<>();
         
-        // Since we don't have a page views tracking system, we'll use a simple approach:
-        // Use the total number of users and orders as a proxy for site activity
-        // This gives us a realistic baseline that correlates with actual business activity
-        
         LocalDateTime startDateTime = startDate.atStartOfDay();
         LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
         
-        // Get total users and orders for baseline calculation
-        long totalUsers = userRepository.count();
-        long totalOrders = orderRepository.count();
+        // Get real views data from database
+        List<Object[]> viewsByDate = viewRepository.getViewsByDateRange(startDateTime, endDateTime);
         
-        // Calculate baseline views per day based on actual user/order activity
-        // This gives us a realistic number that correlates with real business metrics
-        int baselineViewsPerDay = Math.max(50, (int) ((totalUsers * 0.1) + (totalOrders * 0.2)));
+        // Create a map for quick lookup
+        Map<LocalDate, Long> viewsMap = new HashMap<>();
+        for (Object[] row : viewsByDate) {
+            LocalDate date = ((java.sql.Date) row[0]).toLocalDate();
+            Long count = ((Number) row[1]).longValue();
+            viewsMap.put(date, count);
+        }
         
+        // Fill in data for all dates in range
         LocalDate currentDate = startDate;
         while (!currentDate.isAfter(endDate)) {
             Map<String, Object> dayData = new HashMap<>();
             dayData.put("date", currentDate.format(DateTimeFormatter.ISO_LOCAL_DATE));
             
-            // Get actual daily activity
-            long dailyOrders = orderRepository.findByOrderDateBetween(
-                currentDate.atStartOfDay(), 
-                currentDate.atTime(23, 59, 59)
-            ).size();
-            
-            long dailyNewUsers = userRepository.findByCreatedAtBetween(
-                currentDate.atStartOfDay(), 
-                currentDate.atTime(23, 59, 59)
-            ).size();
-            
-            // Calculate views based on actual daily activity
-            // More orders and new users = more views (realistic correlation)
-            int dailyViews = baselineViewsPerDay + 
-                (int) (dailyOrders * 15) + // 15 views per order
-                (int) (dailyNewUsers * 10); // 10 views per new user
-            
-            dayData.put("count", Math.max(50, dailyViews)); // Minimum 50 views per day
+            // Get real view count for this date, or 0 if no data
+            Long dailyViews = viewsMap.getOrDefault(currentDate, 0L);
+            dayData.put("count", dailyViews.intValue());
             viewsData.add(dayData);
             
             currentDate = currentDate.plusDays(1);
@@ -177,5 +168,31 @@ public class AnalyticsService {
         
         return totalRevenue.divide(BigDecimal.valueOf(ordersInPeriod.size()), 2, BigDecimal.ROUND_HALF_UP)
                 .doubleValue();
+    }
+
+    private double calculateRealConversionRate(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+        
+        // Get total views in period
+        long totalViews = viewRepository.countByDateRange(startDateTime, endDateTime);
+        
+        // Get total orders in period
+        List<com.ministore.entity.Order> ordersInPeriod = orderRepository.findByOrderDateBetween(startDateTime, endDateTime);
+        
+        if (totalViews == 0) {
+            return 0.0;
+        }
+        
+        // Calculate conversion rate: (Orders / Views) * 100
+        return (double) ordersInPeriod.size() / totalViews * 100;
+    }
+
+    private long calculateUniqueVisitors(LocalDate startDate, LocalDate endDate) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
+        
+        // Get unique visitors by IP address
+        return viewRepository.countUniqueVisitorsByDateRange(startDateTime, endDateTime);
     }
 }

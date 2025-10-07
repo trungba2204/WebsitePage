@@ -35,9 +35,15 @@
                   </button>
                   <button 
                     class="btn btn-outline-danger btn-sm"
-                    (click)="removeFromFavorites(favorite.productId)">
-                    <i class="bi bi-heart-fill"></i>
-                    Bỏ yêu thích
+                    (click)="removeFromFavorites(favorite.productId)"
+                    [disabled]="isRemoving(favorite.productId)">
+                    @if (isRemoving(favorite.productId)) {
+                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Đang xóa...
+                    } @else {
+                      <i class="bi bi-heart-fill"></i>
+                      Bỏ yêu thích
+                    }
                   </button>
                 </div>
               </div>
