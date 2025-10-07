@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
 import { AdminUser } from '../../../models/admin.model';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -16,6 +17,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class AdminUsersComponent implements OnInit {
   adminService = inject(AdminService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
 
   users: AdminUser[] = [];
   isLoading = false;
@@ -86,8 +88,16 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers();
   }
 
-  deleteUser(user: AdminUser): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa người dùng "${user.email}"?`)) {
+  async deleteUser(user: AdminUser): Promise<void> {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa',
+      message: `Bạn có chắc chắn muốn xóa người dùng "${user.email}"?`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -110,13 +120,22 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  bulkDelete(): void {
+  async bulkDelete(): Promise<void> {
     if (this.selectedUsers.size === 0) {
       this.notificationService.showError('Lỗi!', 'Vui lòng chọn ít nhất một người dùng');
+      
       return;
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa ${this.selectedUsers.size} người dùng đã chọn?`)) {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa nhiều',
+      message: `Bạn có chắc chắn muốn xóa ${this.selectedUsers.size} người dùng đã chọn?`,
+      confirmText: 'Xóa tất cả',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -158,11 +177,19 @@ export class AdminUsersComponent implements OnInit {
     this.selectAll = !this.selectAll;
   }
 
-  toggleUserStatus(user: AdminUser): void {
+  async toggleUserStatus(user: AdminUser): Promise<void> {
     const newStatus = !user.isActive;
     const statusText = newStatus ? 'kích hoạt' : 'vô hiệu hóa';
     
-    if (!confirm(`Bạn có chắc chắn muốn ${statusText} người dùng "${user.email}"?`)) {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận thay đổi trạng thái',
+      message: `Bạn có chắc chắn muốn ${statusText} người dùng "${user.email}"?`,
+      confirmText: 'Xác nhận',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-warning'
+    });
+
+    if (!confirmed) {
       return;
     }
 

@@ -17,6 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import java.util.HashMap;
+import java.util.Map;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -32,6 +38,9 @@ public class AdminController {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     // ==================== PRODUCTS ====================
     
@@ -122,16 +131,48 @@ public class AdminController {
     }
 
     @DeleteMapping("/products/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+    @Transactional
+    public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable Long id) {
         try {
-            if (productRepository.existsById(id)) {
-                productRepository.deleteById(id);
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.notFound().build();
-            }
+            System.out.println("Admin deleting product with ID: " + id);
+            
+            Map<String, Object> result = new HashMap<>();
+            
+            // Delete favorites
+            int favoritesDeleted = entityManager.createNativeQuery("DELETE FROM favorites WHERE product_id = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            result.put("favoritesDeleted", favoritesDeleted);
+            System.out.println("Deleted " + favoritesDeleted + " favorites for product " + id);
+            
+            // Delete order items
+            int orderItemsDeleted = entityManager.createNativeQuery("DELETE FROM order_items WHERE product_id = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            result.put("orderItemsDeleted", orderItemsDeleted);
+            System.out.println("Deleted " + orderItemsDeleted + " order items for product " + id);
+            
+            // Delete product
+            int productDeleted = entityManager.createNativeQuery("DELETE FROM products WHERE id = ?")
+                    .setParameter(1, id)
+                    .executeUpdate();
+            result.put("productDeleted", productDeleted);
+            System.out.println("Deleted " + productDeleted + " products with ID " + id);
+            
+            result.put("success", true);
+            result.put("message", "Product deleted successfully");
+            
+            return ResponseEntity.ok(result);
+            
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            System.err.println("Error deleting product " + id + ": " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            
+            return ResponseEntity.badRequest().body(result);
         }
     }
 

@@ -67,6 +67,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/promotions/promotions.component').then(m => m.PromotionsComponent)
   },
   {
+    path: 'favorites',
+    loadComponent: () => import('./pages/favorites/favorites.component').then(m => m.FavoritesComponent),
+    canActivate: [authGuard]
+  },
+  {
     path: 'admin',
     loadChildren: () => import('./pages/admin/admin.routes').then(m => m.adminRoutes)
   },

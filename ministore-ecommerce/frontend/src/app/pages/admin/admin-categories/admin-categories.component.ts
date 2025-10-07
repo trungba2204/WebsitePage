@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminService } from '../../../services/admin.service';
 import { Category } from '../../../models/product.model';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-categories',
@@ -16,6 +17,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class AdminCategoriesComponent implements OnInit {
   adminService = inject(AdminService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
 
   categories: Category[] = [];
   isLoading = false;
@@ -66,8 +68,16 @@ export class AdminCategoriesComponent implements OnInit {
     );
   }
 
-  deleteCategory(category: Category): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`)) {
+  async deleteCategory(category: Category): Promise<void> {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa',
+      message: `Bạn có chắc chắn muốn xóa danh mục "${category.name}"?`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -90,13 +100,22 @@ export class AdminCategoriesComponent implements OnInit {
     });
   }
 
-  bulkDelete(): void {
+  async bulkDelete(): Promise<void> {
     if (this.selectedCategories.size === 0) {
       this.notificationService.showError('Lỗi!', 'Vui lòng chọn ít nhất một danh mục');
+      
       return;
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa ${this.selectedCategories.size} danh mục đã chọn?`)) {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa nhiều',
+      message: `Bạn có chắc chắn muốn xóa ${this.selectedCategories.size} danh mục đã chọn?`,
+      confirmText: 'Xóa tất cả',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 

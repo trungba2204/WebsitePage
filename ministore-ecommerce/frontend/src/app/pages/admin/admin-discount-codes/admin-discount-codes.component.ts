@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DiscountCodeService } from '../../../services/discount-code.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 import { DiscountCode, CreateDiscountCodeRequest } from '../../../models/discount-code.model';
 
 @Component({
@@ -16,6 +17,7 @@ import { DiscountCode, CreateDiscountCodeRequest } from '../../../models/discoun
 export class AdminDiscountCodesComponent implements OnInit {
   discountCodeService = inject(DiscountCodeService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
   router = inject(Router);
 
   discountCodes: DiscountCode[] = [];

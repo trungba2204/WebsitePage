@@ -2,10 +2,16 @@ package com.ministore.service;
 
 import com.ministore.entity.Product;
 import com.ministore.repository.ProductRepository;
+import com.ministore.repository.FavoriteRepository;
+import com.ministore.repository.OrderItemRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -14,9 +20,15 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final FavoriteRepository favoriteRepository;
+    private final OrderItemRepository orderItemRepository;
+    
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public Page<Product> getProducts(Long categoryId, BigDecimal minPrice, BigDecimal maxPrice, 
                                      Double minRating, Boolean inStockOnly, String search, Pageable pageable) {
@@ -51,8 +63,28 @@ public class ProductService {
         return productRepository.save(existingProduct);
     }
 
+    @Transactional
     public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
+        log.info("Deleting product with ID: {}", id);
+        
+        try {
+            // Delete related records first using repository methods
+            log.info("Deleting favorites for product ID: {}", id);
+            favoriteRepository.deleteByProductId(id);
+            
+            log.info("Deleting order items for product ID: {}", id);
+            orderItemRepository.deleteByProductId(id);
+            
+            // Then delete the product
+            log.info("Deleting product ID: {}", id);
+            productRepository.deleteById(id);
+            
+            log.info("Product deleted successfully: {}", id);
+            
+        } catch (Exception e) {
+            log.error("Error deleting product {}: {}", id, e.getMessage());
+            throw e;
+        }
     }
 
     public Long getProductCountByCategory(Long categoryId) {

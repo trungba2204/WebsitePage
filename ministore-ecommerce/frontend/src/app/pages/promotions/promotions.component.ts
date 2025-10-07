@@ -21,7 +21,7 @@ export class PromotionsComponent implements OnInit {
   categories = [
     { value: 'all', label: 'Tất cả' },
     { value: 'PERCENTAGE', label: 'Giảm phần trăm' },
-    { value: 'FIXED', label: 'Giảm số tiền' }
+    { value: 'FIXED_AMOUNT', label: 'Giảm số tiền' }
   ];
 
   ngOnInit(): void {
@@ -30,27 +30,47 @@ export class PromotionsComponent implements OnInit {
 
   loadDiscountCodes(): void {
     this.isLoading = true;
-    this.discountCodeService.getAllDiscountCodes().subscribe({
+    this.discountCodeService.getActiveDiscountCodes().subscribe({
       next: (codes) => {
+        console.log('🔍 PromotionsComponent - Raw codes from API:', codes);
+        console.log('🔍 PromotionsComponent - Total codes:', codes.length);
+        
         // Filter only active and not expired codes
         this.discountCodes = codes.filter(code => 
           code.isActive && 
           new Date(code.endDate) > new Date()
         );
+        
+        console.log('🔍 PromotionsComponent - Active codes:', this.discountCodes.length);
+        console.log('🔍 PromotionsComponent - Codes by type:');
+        const percentageCodes = this.discountCodes.filter(c => c.discountType === 'PERCENTAGE');
+        const fixedCodes = this.discountCodes.filter(c => c.discountType === 'FIXED_AMOUNT');
+        console.log(`   - PERCENTAGE: ${percentageCodes.length} codes`);
+        console.log(`   - FIXED_AMOUNT: ${fixedCodes.length} codes`);
+        
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading discount codes:', error);
+        console.error('❌ PromotionsComponent - Error loading discount codes:', error);
         this.isLoading = false;
       }
     });
   }
 
   getFilteredDiscountCodes(): DiscountCode[] {
+    console.log('🔍 PromotionsComponent getFilteredDiscountCodes - Selected category:', this.selectedCategory);
+    console.log('🔍 PromotionsComponent getFilteredDiscountCodes - Total codes:', this.discountCodes.length);
+    
     if (this.selectedCategory === 'all') {
+      console.log('✅ PromotionsComponent getFilteredDiscountCodes - Returning all codes:', this.discountCodes.length);
       return this.discountCodes;
     }
-    return this.discountCodes.filter(code => code.discountType === this.selectedCategory);
+    
+    const filtered = this.discountCodes.filter(code => code.discountType === this.selectedCategory);
+    console.log(`✅ PromotionsComponent getFilteredDiscountCodes - Filtered ${this.selectedCategory} codes:`, filtered.length);
+    console.log('✅ PromotionsComponent getFilteredDiscountCodes - Filtered codes:', filtered.map(c => c.code));
+    
+    return filtered;
   }
 
   getStatusText(code: DiscountCode): string {

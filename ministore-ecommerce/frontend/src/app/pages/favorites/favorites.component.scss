@@ -1,0 +1,220 @@
+.favorites-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 2rem 0;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .favorites-header {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2c3e50;
+      margin-bottom: 0.5rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #6c757d;
+      margin: 0;
+    }
+  }
+
+  .favorites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    .favorite-item {
+      .product-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+        &:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-image {
+          height: 200px;
+          overflow: hidden;
+          position: relative;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+          }
+
+          &:hover img {
+            transform: scale(1.05);
+          }
+        }
+
+        .product-info {
+          padding: 1.5rem;
+
+          .product-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+          }
+
+          .product-category {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+          }
+
+          .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 1rem;
+          }
+
+          .product-actions {
+            display: flex;
+            gap: 0.75rem;
+
+            .btn {
+              flex: 1;
+              padding: 0.5rem 1rem;
+              border-radius: 8px;
+              font-weight: 500;
+              transition: all 0.3s ease;
+
+              &.btn-primary {
+                background-color: #007bff;
+                border-color: #007bff;
+
+                &:hover {
+                  background-color: #0056b3;
+                  border-color: #0056b3;
+                }
+              }
+
+              &.btn-outline-danger {
+                color: #dc3545;
+                border-color: #dc3545;
+
+                &:hover {
+                  background-color: #dc3545;
+                  border-color: #dc3545;
+                  color: white;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .favorites-summary {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    p {
+      margin: 0;
+      font-size: 1.1rem;
+
+      strong {
+        color: #007bff;
+      }
+    }
+  }
+
+  .empty-favorites {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    .empty-icon {
+      margin-bottom: 1.5rem;
+
+      i {
+        font-size: 4rem;
+        color: #dee2e6;
+      }
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #6c757d;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #6c757d;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .btn {
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+
+      &.btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+
+        &:hover {
+          background-color: #0056b3;
+          border-color: #0056b3;
+          transform: translateY(-2px);
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .favorites-page {
+    .favorites-header h1 {
+      font-size: 2rem;
+    }
+
+    .favorites-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .favorite-item .product-card {
+      .product-info {
+        padding: 1rem;
+
+        .product-actions {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+      }
+    }
+  }
+}

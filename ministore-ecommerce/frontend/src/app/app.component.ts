@@ -3,12 +3,13 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { NotificationComponent } from './components/notification/notification.component';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FooterComponent, NotificationComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent, NotificationComponent, ConfirmationModalComponent],
   template: `
     @if (!isAdminRoute) {
       <app-header></app-header>
@@ -20,6 +21,7 @@ import { filter } from 'rxjs/operators';
       <app-footer></app-footer>
     }
     <app-notification></app-notification>
+    <app-confirmation-modal></app-confirmation-modal>
   `,
   styles: [`
     :host {

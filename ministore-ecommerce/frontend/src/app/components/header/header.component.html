@@ -19,6 +19,7 @@
         <li><a routerLink="/contact" routerLinkActive="active">Liên hệ</a></li>
         @if (authService.isAuthenticated()) {
           <li><a routerLink="/orders" routerLinkActive="active">Đơn hàng</a></li>
+          <li><a routerLink="/favorites" routerLinkActive="active">Yêu thích</a></li>
         }
       </ul>
 
@@ -103,6 +104,9 @@
               <a routerLink="/orders" (click)="closeUserMenu()">
                 <i class="bi bi-box-seam"></i> Đơn hàng
               </a>
+              <a routerLink="/favorites" (click)="closeUserMenu()">
+                <i class="bi bi-heart"></i> Yêu thích
+              </a>
               <a (click)="openAvatarModal()" class="avatar-change">
                 <i class="bi bi-camera"></i> Thay đổi ảnh đại diện
               </a>
@@ -136,6 +140,7 @@
         @if (authService.isAuthenticated()) {
           <a routerLink="/profile" (click)="toggleMenu()">Tài khoản</a>
           <a routerLink="/orders" (click)="toggleMenu()">Đơn hàng</a>
+          <a routerLink="/favorites" (click)="toggleMenu()">Yêu thích</a>
           <a (click)="logout(); toggleMenu()">Đăng xuất</a>
         }
       </div>

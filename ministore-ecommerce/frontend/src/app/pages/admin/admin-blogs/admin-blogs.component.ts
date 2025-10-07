@@ -6,6 +6,7 @@ import { AdminService } from '../../../services/admin.service';
 import { Blog } from '../../../models/blog.model';
 import { BlogResponse } from '../../../services/blog.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-blogs',
@@ -17,6 +18,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class AdminBlogsComponent implements OnInit {
   adminService = inject(AdminService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
 
   blogs: Blog[] = [];
   isLoading = false;
@@ -87,8 +89,16 @@ export class AdminBlogsComponent implements OnInit {
     this.loadBlogs();
   }
 
-  deleteBlog(blog: Blog): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa bài viết "${blog.title}"?`)) {
+  async deleteBlog(blog: Blog): Promise<void> {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa',
+      message: `Bạn có chắc chắn muốn xóa bài viết "${blog.title}"?`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -111,13 +121,22 @@ export class AdminBlogsComponent implements OnInit {
     });
   }
 
-  bulkDelete(): void {
+  async bulkDelete(): Promise<void> {
     if (this.selectedBlogs.size === 0) {
       this.notificationService.showError('Lỗi!', 'Vui lòng chọn ít nhất một bài viết');
+      
       return;
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa ${this.selectedBlogs.size} bài viết đã chọn?`)) {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa nhiều',
+      message: `Bạn có chắc chắn muốn xóa ${this.selectedBlogs.size} bài viết đã chọn?`,
+      confirmText: 'Xóa tất cả',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 

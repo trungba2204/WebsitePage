@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AdminService } from '../../../services/admin.service';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 interface TeamMember {
   id: number;

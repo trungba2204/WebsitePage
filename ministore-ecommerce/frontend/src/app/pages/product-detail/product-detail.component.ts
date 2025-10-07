@@ -5,6 +5,8 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ProductService } from '../../services/product.service';
 import { CartService } from '../../services/cart.service';
 import { NotificationService } from '../../services/notification.service';
+import { FavoriteService } from '../../services/favorite.service';
+import { AuthService } from '../../services/auth.service';
 import { Product } from '../../models/product.model';
 import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
@@ -19,6 +21,8 @@ export class ProductDetailComponent implements OnInit {
   productService = inject(ProductService);
   cartService = inject(CartService);
   notificationService = inject(NotificationService);
+  favoriteService = inject(FavoriteService);
+  authService = inject(AuthService);
   route = inject(ActivatedRoute);
   
   product: Product | null = null;
@@ -40,10 +44,26 @@ export class ProductDetailComponent implements OnInit {
       next: (product) => {
         this.product = product;
         this.isLoading = false;
+        
+        // Check if user is authenticated and load favorite status
+        if (this.authService.isAuthenticated()) {
+          this.checkFavoriteStatus(id);
+        }
       },
       error: (error) => {
         console.error('Error loading product:', error);
         this.isLoading = false;
+      }
+    });
+  }
+
+  checkFavoriteStatus(productId: number): void {
+    this.favoriteService.isFavorite(productId).subscribe({
+      next: (isFavorite) => {
+        this.isFavorite = isFavorite;
+      },
+      error: (error) => {
+        console.error('Error checking favorite status:', error);
       }
     });
   }
@@ -98,11 +118,35 @@ export class ProductDetailComponent implements OnInit {
   }
 
   toggleFavorite(): void {
-    this.isFavorite = !this.isFavorite;
+    if (!this.product || !this.authService.isAuthenticated()) {
+      this.notificationService.showError('Lỗi!', 'Vui lòng đăng nhập để sử dụng chức năng yêu thích');
+      return;
+    }
+
     if (this.isFavorite) {
-      this.notificationService.showSuccess('Thành công!', 'Đã thêm vào danh sách yêu thích');
+      // Remove from favorites
+      this.favoriteService.removeFromFavorites(this.product.id).subscribe({
+        next: () => {
+          this.isFavorite = false;
+          this.notificationService.showSuccess('Thành công!', 'Đã xóa khỏi danh sách yêu thích');
+        },
+        error: (error) => {
+          console.error('Error removing from favorites:', error);
+          this.notificationService.showError('Lỗi!', 'Không thể xóa khỏi danh sách yêu thích');
+        }
+      });
     } else {
-      this.notificationService.showSuccess('Thành công!', 'Đã xóa khỏi danh sách yêu thích');
+      // Add to favorites
+      this.favoriteService.addToFavorites({ productId: this.product.id }).subscribe({
+        next: () => {
+          this.isFavorite = true;
+          this.notificationService.showSuccess('Thành công!', 'Đã thêm vào danh sách yêu thích');
+        },
+        error: (error) => {
+          console.error('Error adding to favorites:', error);
+          this.notificationService.showError('Lỗi!', 'Không thể thêm vào danh sách yêu thích');
+        }
+      });
     }
   }
 }

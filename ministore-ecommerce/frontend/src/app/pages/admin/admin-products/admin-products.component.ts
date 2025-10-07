@@ -6,6 +6,7 @@ import { AdminService } from '../../../services/admin.service';
 import { Product, ProductResponse } from '../../../models/product.model';
 import { Category } from '../../../models/product.model';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-products',
@@ -17,6 +18,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class AdminProductsComponent implements OnInit {
   adminService = inject(AdminService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
 
   products: Product[] = [];
   categories: Category[] = [];
@@ -106,8 +108,16 @@ export class AdminProductsComponent implements OnInit {
     this.loadProducts();
   }
 
-  deleteProduct(product: Product): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`)) {
+  async deleteProduct(product: Product): Promise<void> {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa sản phẩm',
+      message: `Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 
@@ -130,13 +140,21 @@ export class AdminProductsComponent implements OnInit {
     });
   }
 
-  bulkDelete(): void {
+  async bulkDelete(): Promise<void> {
     if (this.selectedProducts.size === 0) {
       this.notificationService.showError('Lỗi!', 'Vui lòng chọn ít nhất một sản phẩm');
       return;
     }
 
-    if (!confirm(`Bạn có chắc chắn muốn xóa ${this.selectedProducts.size} sản phẩm đã chọn?`)) {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa nhiều sản phẩm',
+      message: `Bạn có chắc chắn muốn xóa ${this.selectedProducts.size} sản phẩm đã chọn?`,
+      confirmText: 'Xóa tất cả',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 

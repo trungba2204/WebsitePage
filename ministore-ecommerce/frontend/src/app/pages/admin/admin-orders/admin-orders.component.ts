@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AdminOrderService, OrderResponse } from '../../../services/admin-order.service';
 import { Order, OrderStatus } from '../../../models/order.model';
 import { NotificationService } from '../../../services/notification.service';
+import { ConfirmationModalService } from '../../../services/confirmation-modal.service';
 
 @Component({
   selector: 'app-admin-orders',
@@ -16,6 +17,7 @@ import { NotificationService } from '../../../services/notification.service';
 export class AdminOrdersComponent implements OnInit {
   adminOrderService = inject(AdminOrderService);
   notificationService = inject(NotificationService);
+  confirmationService = inject(ConfirmationModalService);
 
   // Make OrderStatus available in template
   OrderStatus = OrderStatus;
@@ -278,8 +280,16 @@ export class AdminOrdersComponent implements OnInit {
     return order.status !== 'DELIVERED' && order.status !== 'CANCELLED';
   }
 
-  deleteOrder(order: Order): void {
-    if (!confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${order.orderNumber}? Hành động này không thể hoàn tác.`)) {
+  async deleteOrder(order: Order): Promise<void> {
+    const confirmed = await this.confirmationService.show({
+      title: 'Xác nhận xóa',
+      message: `Bạn có chắc chắn muốn xóa đơn hàng ${order.orderNumber}? Hành động này không thể hoàn tác.`,
+      confirmText: 'Xóa',
+      cancelText: 'Hủy',
+      confirmClass: 'btn-danger'
+    });
+
+    if (!confirmed) {
       return;
     }
 

@@ -49,8 +49,8 @@ public class AdminDiscountCodeController {
         discountCode.setDiscountValue(request.getDiscountValue());
         discountCode.setMinOrderAmount(request.getMinOrderAmount());
         discountCode.setMaxDiscountAmount(request.getMaxDiscountAmount());
-        discountCode.setStartDate(request.getStartDate());
-        discountCode.setEndDate(request.getEndDate());
+        discountCode.setStartDate(request.getStartDateTime());
+        discountCode.setEndDate(request.getEndDateTime());
         discountCode.setUsageLimit(request.getUsageLimit());
         discountCode.setUsedCount(0);
         discountCode.setIsActive(request.getIsActive());
@@ -73,8 +73,8 @@ public class AdminDiscountCodeController {
         code.setDiscountValue(request.getDiscountValue());
         code.setMinOrderAmount(request.getMinOrderAmount());
         code.setMaxDiscountAmount(request.getMaxDiscountAmount());
-        code.setStartDate(request.getStartDate());
-        code.setEndDate(request.getEndDate());
+        code.setStartDate(request.getStartDateTime());
+        code.setEndDate(request.getEndDateTime());
         code.setUsageLimit(request.getUsageLimit());
         code.setIsActive(request.getIsActive());
 

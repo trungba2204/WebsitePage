@@ -49,6 +49,7 @@ export class BlogsComponent implements OnInit {
   loadBlogs(): void {
     console.log('🔍 BlogsComponent loadBlogs - Loading blogs with filter:', this.filter);
     console.log('🔍 BlogsComponent loadBlogs - Filter category value:', this.filter.category);
+    console.log('🔍 BlogsComponent loadBlogs - Selected category:', this.selectedCategory);
     this.isLoading = true;
     
     this.blogService.getBlogs(this.filter).subscribe({
@@ -59,10 +60,14 @@ export class BlogsComponent implements OnInit {
         this.totalBlogs = response.totalElements;
         this.isLoading = false;
         console.log('✅ BlogsComponent loadBlogs - Blogs loaded:', this.blogs.length, 'blogs');
-        console.log('✅ BlogsComponent loadBlogs - First blog category:', this.blogs[0]?.category);
+        console.log('✅ BlogsComponent loadBlogs - Total blogs:', this.totalBlogs);
+        if (this.blogs.length > 0) {
+          console.log('✅ BlogsComponent loadBlogs - First blog category:', this.blogs[0]?.category);
+          console.log('✅ BlogsComponent loadBlogs - All blog categories:', this.blogs.map(b => b.category));
+        }
       },
       error: (error) => {
-        console.error('Error loading blogs:', error);
+        console.error('❌ BlogsComponent loadBlogs - Error loading blogs:', error);
         this.isLoading = false;
       }
     });
@@ -114,6 +119,17 @@ export class BlogsComponent implements OnInit {
 
   onCategoryChange(categorySlug: string): void {
     console.log('🔍 BlogsComponent onCategoryChange - Category slug:', categorySlug);
+    
+    // If categorySlug is empty, clear the filter
+    if (!categorySlug || categorySlug === '') {
+      console.log('🔍 BlogsComponent onCategoryChange - Clearing category filter');
+      this.selectedCategory = '';
+      this.filter.category = undefined;
+      this.filter.page = 0;
+      this.currentPage = 0;
+      this.loadBlogs();
+      return;
+    }
     
     // Find the category name from the slug
     const category = this.categories.find(cat => cat.slug === categorySlug);
