@@ -59,6 +59,10 @@ export class AdminCategoryFormComponent implements OnInit {
         // Set image preview if category has image
         if (category.imageUrl) {
           this.imagePreview = category.imageUrl;
+          console.log('🔍 Category image loaded:', category.imageUrl);
+        } else {
+          this.imagePreview = null;
+          console.log('🔍 No category image found');
         }
         
         this.isLoading = false;
@@ -132,6 +136,7 @@ export class AdminCategoryFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
+      console.log('🔍 Image selected:', file.name, file.size, file.type);
       
       // Validate file type
       if (!file.type.startsWith('image/')) {
@@ -151,6 +156,7 @@ export class AdminCategoryFormComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = (e) => {
         this.imagePreview = e.target?.result as string;
+        console.log('🔍 Image preview created');
       };
       reader.readAsDataURL(file);
       
@@ -160,6 +166,7 @@ export class AdminCategoryFormComponent implements OnInit {
   }
 
   uploadImage(file: File): void {
+    console.log('🔍 Starting image upload for file:', file.name);
     this.isUploadingImage = true;
     
     this.adminService.uploadImage(file).subscribe({
@@ -168,6 +175,7 @@ export class AdminCategoryFormComponent implements OnInit {
         this.categoryForm.imageUrl = response.url;
         this.isUploadingImage = false;
         this.notificationService.showSuccess('Thành công!', 'Ảnh đã được upload thành công');
+        console.log('🔍 Category imageUrl updated to:', this.categoryForm.imageUrl);
       },
       error: (error: any) => {
         console.error('❌ Error uploading image:', error);
@@ -181,6 +189,7 @@ export class AdminCategoryFormComponent implements OnInit {
     this.selectedFile = null;
     this.imagePreview = null;
     this.categoryForm.imageUrl = '';
+    console.log('🔍 Image removed, cleared all image data');
   }
 
   onCancel(): void {
