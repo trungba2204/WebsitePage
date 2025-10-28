@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -15,12 +15,26 @@ import { LoginRequest } from '../../models/user.model';
         <h1>Đăng nhập</h1>
         <form (ngSubmit)="onSubmit()">
           <div class="form-group">
-            <label>Email</label>
-            <input type="email" [(ngModel)]="credentials.email" name="email" class="form-control" required />
+            <label for="email">Email</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="credentials.email" 
+              name="email" 
+              class="form-control" 
+              placeholder="Nhập email của bạn"
+              required />
           </div>
           <div class="form-group">
-            <label>Mật khẩu</label>
-            <input type="password" [(ngModel)]="credentials.password" name="password" class="form-control" required />
+            <label for="password">Mật khẩu</label>
+            <input 
+              type="password" 
+              id="password"
+              [(ngModel)]="credentials.password" 
+              name="password" 
+              class="form-control" 
+              placeholder="Nhập mật khẩu"
+              required />
           </div>
           <button type="submit" class="btn btn-primary w-100" [disabled]="isLoading">
             {{ isLoading ? 'Đang xử lý...' : 'Đăng nhập' }}
@@ -39,16 +53,44 @@ import { LoginRequest } from '../../models/user.model';
     .w-100 { width: 100%; }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   authService = inject(AuthService);
   router = inject(Router);
   
   credentials: LoginRequest = { email: '', password: '' };
   isLoading = false;
 
+  ngOnInit(): void {
+    // Clear any old authentication data when loading login page
+    console.log('🔍 LoginComponent ngOnInit - Clearing any old authentication data');
+    
+    // Check if user is already logged in
+    const token = this.authService.getToken();
+    if (token) {
+      console.log('🔍 LoginComponent ngOnInit - User already has token, clearing it');
+      // Don't clear here, let user decide to login again
+    }
+    
+    // Clear form
+    this.credentials = { email: '', password: '' };
+  }
+
   onSubmit(): void {
+    // Validate form fields
     if (!this.credentials.email || !this.credentials.password) {
-      console.error('❌ LoginComponent onSubmit - Missing credentials');
+      console.error('❌ LoginComponent onSubmit - Missing credentials:', {
+        email: this.credentials.email || '(empty)',
+        password: this.credentials.password ? '***' : '(empty)'
+      });
+      
+      // Show user-friendly error message
+      if (!this.credentials.email && !this.credentials.password) {
+        alert('⚠️ Vui lòng nhập email và mật khẩu!');
+      } else if (!this.credentials.email) {
+        alert('⚠️ Vui lòng nhập email!');
+      } else if (!this.credentials.password) {
+        alert('⚠️ Vui lòng nhập mật khẩu!');
+      }
       return;
     }
 
@@ -73,8 +115,10 @@ export class LoginComponent {
         // Show appropriate error message
         if (error.status === 401) {
           alert('❌ Email hoặc mật khẩu không đúng!\n\n💡 Tài khoản mặc định:\n• Admin: admin@ministore.com / admin123\n• User: Cần đăng ký tài khoản mới');
+        } else if (error.status === 0 || error.status === undefined) {
+          alert('❌ Không thể kết nối đến server!\n\n💡 Vui lòng kiểm tra:\n• Backend đang chạy (http://localhost:8080)\n• Frontend đang chạy (http://localhost:4200)');
         } else {
-          alert('❌ Lỗi đăng nhập. Vui lòng thử lại!');
+          alert(`❌ Lỗi đăng nhập (${error.status}). Vui lòng thử lại!`);
         }
       }
     });
